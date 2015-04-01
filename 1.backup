@@ -1,0 +1,136 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.1.1
+-- Dumped by pg_dump version 9.1.1
+-- Started on 2014-03-19 14:59:37
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- TOC entry 163 (class 3079 OID 11638)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 1854 (class 0 OID 0)
+-- Dependencies: 163
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 162 (class 1259 OID 16397)
+-- Dependencies: 6
+-- Name: admins; Type: TABLE; Schema: public; Owner: hype2019; Tablespace: 
+--
+
+CREATE TABLE admins (
+    id integer NOT NULL,
+    username character varying(50) NOT NULL,
+    password character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.admins OWNER TO hype2019;
+
+--
+-- TOC entry 161 (class 1259 OID 16395)
+-- Dependencies: 6 162
+-- Name: unique_id; Type: SEQUENCE; Schema: public; Owner: hype2019
+--
+
+CREATE SEQUENCE unique_id
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.unique_id OWNER TO hype2019;
+
+--
+-- TOC entry 1856 (class 0 OID 0)
+-- Dependencies: 161
+-- Name: unique_id; Type: SEQUENCE OWNED BY; Schema: public; Owner: hype2019
+--
+
+ALTER SEQUENCE unique_id OWNED BY admins.id;
+
+
+--
+-- TOC entry 1857 (class 0 OID 0)
+-- Dependencies: 161
+-- Name: unique_id; Type: SEQUENCE SET; Schema: public; Owner: hype2019
+--
+
+SELECT pg_catalog.setval('unique_id', 1, true);
+
+
+--
+-- TOC entry 1847 (class 2604 OID 16400)
+-- Dependencies: 162 161 162
+-- Name: id; Type: DEFAULT; Schema: public; Owner: hype2019
+--
+
+ALTER TABLE admins ALTER COLUMN id SET DEFAULT nextval('unique_id'::regclass);
+
+
+--
+-- TOC entry 1848 (class 0 OID 16397)
+-- Dependencies: 162
+-- Data for Name: admins; Type: TABLE DATA; Schema: public; Owner: hype2019
+--
+
+COPY admins (id, username, password) FROM stdin;
+1	root	root
+\.
+
+
+--
+-- TOC entry 1853 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: public; Type: ACL; Schema: -; Owner: hype2019
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM hype2019;
+GRANT ALL ON SCHEMA public TO hype2019;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- TOC entry 1855 (class 0 OID 0)
+-- Dependencies: 162
+-- Name: admins; Type: ACL; Schema: public; Owner: hype2019
+--
+
+REVOKE ALL ON TABLE admins FROM PUBLIC;
+REVOKE ALL ON TABLE admins FROM hype2019;
+GRANT DELETE ON TABLE admins TO hype2019;
+GRANT SELECT,INSERT ON TABLE admins TO hype2019 WITH GRANT OPTION;
+
+
+-- Completed on 2014-03-19 14:59:37
+
+--
+-- PostgreSQL database dump complete
+--
+
