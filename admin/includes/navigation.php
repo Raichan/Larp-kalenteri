@@ -54,7 +54,10 @@ if ($activePage == 5) {
 <a href="../../help.php"><?php echo $nav_help; ?></a>
 </li>
 <?php
-	session_start();
+	if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+    } 
 	if (isset($_SESSION["valid"])) {
 		$ADMIN = true;
 		$events = getListOfEventsForApproval();
