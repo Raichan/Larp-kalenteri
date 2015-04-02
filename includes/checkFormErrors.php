@@ -50,7 +50,7 @@ $eventid = $eventname = $eventtype = $datestart = $dateend = $datetext = $signup
 $genre = array();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
-    $valid = true; // Are there errors in the form?
+	$valid = true; // Are there errors in the form?
 
     if (!empty($_POST["eventid"])) {
         $eventid = test_input($_POST["eventid"]);
@@ -270,7 +270,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         $organizeremail = pg_escape_string($organizeremail);
         $website1 = pg_escape_string($website1);
         $website2 = pg_escape_string($website2);
-
+        $illusionSync = $_POST["illusionsync"] == "1" ? "true" : "false";
+        
         // If we're modifying the event, original and modified ones must have same passwords
         if ($proceedurl == "modifySuccess.php") {
             $status = "MODIFIED";
@@ -294,7 +295,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         if ($ADMIN == true) {
             $status = 'ACTIVE';
         }
-        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "')";
+        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree, illusionSync) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "'," . $illusionSync . ")";
 
         $result = dbQuery($query);
 

@@ -160,6 +160,17 @@ if (isset($_SESSION["valid"])) {
             <input id="website1" name="website1" type="text" maxlength="100" value="<?php echo $website1; ?>"/><span class="error"><?php echo $web1Err; ?></span></p>
         <p><label for="website2"><?php echo $label_link2; ?></label><br>
             <input id="website2" name="website2" type="text" maxlength="100" value="<?php echo $website2; ?>"/><span class="error"><?php echo $web2Err; ?></span></p> 
+        
+        <p>
+          <span>
+            <input id="illusionsync" name="illusionsync" type="checkbox" value="1" checked="checked"/>
+            <label for="illusionsync"><?php echo $label_illusion; ?></label>
+          </span>
+          <p>
+            <small><?php echo $text_illusion; ?></small>
+          </p>
+        </p>
+            
         <input class="btn btn-primary" id="save" type="submit" name="submit" value="<?php echo $button_submit; ?>" />
     </form>	
 </div>

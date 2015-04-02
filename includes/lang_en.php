@@ -116,6 +116,8 @@ $label_orgname = "Organizer name";
 $label_orgemail = "Organizer email *";
 $label_link1 = "Web site 1";
 $label_link2 = "Web site 2";
+$label_illusion = "Create Illusion event";
+$text_illusion = "Event will be created also into the Forge &amp; Illusionin event calendar (<a href=\"http://www.forgeandillusion.net/illusion/\">www.forgeandillusion.net/illusion</a>)";
 $button_submit = "Submit";
 
 // includes/eventInfo.php
