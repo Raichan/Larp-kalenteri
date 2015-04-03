@@ -27,16 +27,12 @@ class cEvent {
     private $link2;
     private $status;
     private $password;
-    private $illusionId;
-    private $eventFull;
-    private $invitationOnly;
-    private $languageFree;
 
     /* Contructor */
 
-    public function __construct($id, $eventName, $eventType, $startDate, $endDate, $dateTextField, $startSignupTime, $endSignupTime, 
-    		$locationDropDown, $locationTextField, $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly, $storyDescription, $infoDescription, 
-    		$organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull, $invitationOnly, $languageFree, $illusionId) {
+    public function __construct($id, $eventName, $eventType, $startDate, $endDate, $dateTextField, $startSignupTime
+    , $endSignupTime, $locationDropDown, $locationTextField, $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly
+    , $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password) {
         $this->id = $id;
         $this->eventName = $eventName;
         $this->eventType = $eventType;
@@ -60,10 +56,6 @@ class cEvent {
         $this->link2 = $link2;
         $this->status = $status;
         $this->password = $password;
-        $this->illusionId = $illusionId;
-        $this->eventFull = $eventFull;
-        $this->invitationOnly = $invitationOnly;
-        $this->languageFree = $languageFree;
     }
 
     /* Function, which returns a string of genres. */
@@ -355,45 +347,4 @@ class cEvent {
         return $ret;
     }
 
-    public function getIllusionId() {
-    	return $this->illusionId;
-    }
-    
-    public function getInfoDescription() {
-    	return $this->infoDescription;
-    }
-    
-    public function getLocation() {
-    	// TODO: Dropdown
-    	return $this->locationTextField;
-    }
-    
-    public function getAgeLimit() {
-    	return $this->ageLimit;
-    }
-    
-    public function getIconUrl() {
-    	return $this->iconUrl;
-    }
-    
-    public function getSignUpEndDate() {
-    	return $this->endSignupTime;
-    }
-    
-    public function getSignUpStartDate() {
-    	return $this->startSignupTime;
-    }
-    
-    public function getStartDate() {
-    	return $this->startDate;
-    }
-    
-    public function getEndDate() {
-    	return $this->endDate;
-    }
-    
-    public function getInviteOnly() {
-    	return $this->invitationOnly;
-    }
-    
 }
