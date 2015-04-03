@@ -151,18 +151,31 @@ function getCeventObject($id) {
     } else {
         require_once ('./../dat/cEvent.php');
     }
-    $query = "SELECT * FROM events WHERE id = '$id';";
-    $result = dbQuery($query);
-    if ($result != null) {
-        $row = pg_fetch_row($result);
-        $event = new cEvent($row[0], $row[1], $row[2], $row[3], $row[4], $row[5], $row[6]
-                , $row[7], $row[8], $row[9], $row[10], $row[11], $row[12], $row[13]
-                , $row[14], $row[15], $row[16], $row[17], $row[18], $row[19], $row[20], $row[21], $row[22]);
-        return $event;
-    } else {
-        return null;
-    }
+
+		$result = dbQueryP(
+			"select
+			  id, eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, 
+			  locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
+				invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
+				link1, link2, status, password, illusionId
+			from 
+			  events
+			where 
+			  id = $1", [$id]);
+		
+		if ($result) {
+			$row = pg_fetch_assoc($result);
+			return new cEvent($row['id'], $row['eventname'], $row['eventtype'], $row['startdate'], $row['enddate'], $row['datetextfield'], 
+					$row['startsignuptime'], $row['endsignuptime'], $row['locationdropdown'], $row['locationtextfield'], $row['iconurl'], 
+					$row['genre'], $row['cost'], $row['agelimit'], $row['beginnerfriendly'], $row['storydescription'], $row['infodescription'], 
+					$row['organizername'], $row['organizeremail'], $row['link1'], $row['link2'], $row['status'], $row['password'], $row['eventfull'], 
+					$row['invitationonly'], $row['languagefree'], $row['illusionid']); 
+		}
+		
+		return null;
 }
+
+
 
 function getListOfEventsForApproval() {
     if (file_exists('./dat/connectDB.php')) {
@@ -241,6 +254,7 @@ function approveEvent($eventId) {
     if ($res == null) {
         return false;
     }
+    
     // If it's a modified event, the original event will be updated and the modified one will be deleted
     if (strpos($res['status'], "MODIFIED") !== false) {
         $originalEvent = $res['password'];
@@ -255,7 +269,7 @@ function approveEvent($eventId) {
     }
     // If it's a new event, it will just be turned active
     else {
-        $query = "UPDATE events SET status = 'ACTIVE' WHERE id = $eventId;";
+    	$query = "UPDATE events SET status = 'ACTIVE' WHERE id = $eventId;";
         $result = dbQuery($query);
         if ($result != null) {
             return true;
