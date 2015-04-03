@@ -1,1 +1,1 @@
-alter table events add column illusionSync boolean default false; ﻿
+alter table events add column illusionId bigint default null;
