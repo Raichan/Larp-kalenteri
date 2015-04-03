@@ -1,0 +1,7 @@
+<?php
+
+define("FNI_BASE_URL", 'https://www.forgeandillusion.net');
+define("FNI_CLIENT_ID", 'my-fni-client-id');
+define("FNI_CLIENT_SECRET", 'my-fni-client-secret');
+
+?>
