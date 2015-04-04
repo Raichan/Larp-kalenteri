@@ -108,6 +108,55 @@
   		return $this->getIllusionTypeMap()[$this->getTypeName($type)];
   	}
   	
+  	public function findUserByEmail($email) {
+  		$response = $this->createClient()->get("$this->base_url/rest/users/users", [
+    		'query' => ['email' => $email]
+			]);
+  		
+  		if ($response->getStatusCode() == 200) {
+  			return $response->json()[0];
+  		}
+  		
+  		return null;
+  	}
+  	
+  	public function createUser($email, $firstName, $lastName, $locale, $password) {
+  		$response = $this->createClient()->post("$this->base_url/rest/users/users", [
+  			'json' => [
+  				'firstName' => $firstName,
+  				'lastName' => $lastName,
+  				'locale' => $locale,
+  		    'emails' => [ $email ]
+  			],
+  		  'query' => [
+  		    'generateCredentials' => false,
+  		  	'sendCredentials' => false,
+  		  	'password' => $password	
+  		  ]
+  		]);
+  		
+  		if ($response->getStatusCode() == 200) {
+  			return $response->json();
+  		}
+  		
+  		return null;
+  	}
+  	
+  	public function createEventParticipant($eventId, $userId, $role) {
+  		$response = $this->createClient()->post("$this->base_url/rest/illusion/events/$eventId/participants", [
+  		  'json' => [
+  				'userId' => $userId,
+  		  	'role' => $role
+  			]
+  		]);
+  	
+  		if ($response->getStatusCode() == 200) {
+  			return $response->json();
+  		}
+  	
+  		return null;
+  	}
+  	
   	private function listIllusionGenres() {
   		$response = $this->createClient()->get("$this->base_url/rest/illusion/genres");
   		
