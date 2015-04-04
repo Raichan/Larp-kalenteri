@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../illusion/illusion.php';
+
 if (isset($_SESSION["valid"])) {
     $ADMIN = true;
 } else {
@@ -138,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $costErr = $err_cost;
             $valid = false;
         }
-		if(cost < 0) {
+		if($cost < 0) {
 			$costErr = $err_cost;
             $valid = false;
 		}
@@ -295,8 +297,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         if ($ADMIN == true) {
             $status = 'ACTIVE';
         }
-        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree, illusionSync) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "'," . $illusionSync . ")";
-
+        
+        if ($illusionSync) {
+        	$typeId = getIllusionClient()->getIllusionTypeId($eventtype);
+        	$genreIds = getIllusionClient()->getIllusionGenreIds(explode(',',$genrestring));
+        	
+        	// TODO: costs
+        	// TODO: $datetext, $storydesc, $organizername
+        	// TODO: $organizeremail, $website1, $website2, $status, $password, $eventfull, 
+        	// TODO: $languagefree
+        	
+        	$illusionEvent = getIllusionClient()->createEvent(
+        			$ADMIN == true, 
+        			$eventname, 
+        			$infodesc, 
+        			null, 
+        			$invitationonly == "false" ? 'OPEN' : 'INVITE_ONLY',
+        			null, 
+        			'EUR', 
+        			$location2, 
+        			$agelimit, 
+        			$beginnerfriendly != "false", 
+        			$icon, 
+        			$typeId, 
+        			(new DateTime())->setTimestamp(intval($signupstart)), 
+        			(new DateTime())->setTimestamp(intval($signupend)), 
+        			null, 
+        			(new DateTime())->setTimestamp(intval($datestart)), 
+        			(new DateTime())->setTimestamp(intval($dateend)), 
+        			$genreIds
+        	);
+        	
+        	$illusionId = $illusionEvent['id'];
+          $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree, illusionId) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "'," . $illusionId . ")";
+        } else {
+        	$query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree. "')";
+        }
+        
         $result = dbQuery($query);
 
         if ($result) {
