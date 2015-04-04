@@ -29,11 +29,11 @@
   			"beginnerFriendly" => $beginnerFriendly,
   			"imageUrl" => $imageUrl,
   			"typeId" => $typeId,
-  			"signUpStartDate" => (new DateTime())->setTimestamp(intval($signUpStartDate))->format('c'),
-  			"signUpEndDate" => (new DateTime())->setTimestamp(intval($signUpEndDate))->format('c'),
+  			"signUpStartDate" => $signUpStartDate->format('c'),
+  			"signUpEndDate" => $signUpEndDate->format('c'),
   			"domain" => $domain,
-  			"start" => (new DateTime())->setTimestamp(intval($startDate))->format('c'),
-  			"end" => (new DateTime())->setTimestamp(intval($endDate))->format('c'),
+  			"start" => $startDate->format('c'),
+  			"end" => $endDate->format('c'),
   			"genreIds" => $genreIds
   		);
   		
@@ -63,11 +63,11 @@
   			"beginnerFriendly" => $beginnerFriendly,
   			"imageUrl" => $imageUrl,
   			"typeId" => $typeId,
-  			"signUpStartDate" => (new DateTime())->setTimestamp(intval($signUpStartDate))->format('c'),
-  			"signUpEndDate" => (new DateTime())->setTimestamp(intval($signUpEndDate))->format('c'),
+  			"signUpStartDate" => $signUpStartDate->format('c'),
+  			"signUpEndDate" => $signUpEndDate->format('c'),
   			"domain" => $domain,
-  			"start" => (new DateTime())->setTimestamp(intval($startDate))->format('c'),
-  			"end" => (new DateTime())->setTimestamp(intval($endDate))->format('c'),
+  			"start" => $startDate->format('c'),
+  			"end" => $endDate->format('c'),
   			"genreIds" => $genreIds
   		);
   		
@@ -85,17 +85,27 @@
   	public function getIllusionGenreIds($genres) {
   		$result = [];
   		
+  		$genres = array_filter($genres);
   		if (empty($genres)) {
   			return $result;
   		}
-  		
+
   		$genreIdMap = $this->getIllusionGenreMap();
   		
   		foreach ($this->getGenreNames($genres) as $genreName) {
-  			$result[] = $genreIdMap[$genreName];
+  			$genreId = $genreIdMap[$genreName];
+  			if (!$genreId) {
+  				var_dump($genreName);
+  				die;
+  			}
+  			$result[] = $genreId;
   		}
   		
   		return $result;
+  	}
+  	
+  	public function getIllusionTypeId($type) {
+  		return $this->getIllusionTypeMap()[$this->getTypeName($type)];
   	}
   	
   	private function listIllusionGenres() {
@@ -129,15 +139,18 @@
   	}
   	
   	private function getGenreName($genre) {
+  		// TODO: This mapping should be in database 
   		switch (trim($genre)) {
   			case "fantasy":
   			  return "Fantasia";
+  			case "sci-fi":
 	  		case "scifi":
 	  			return "Sci-fi";
   			case "cyberpunk":
   				return "Cyberpunk";
   			case "steampunk":
   				return "Steampunk";
+  			case "post-apocalyptic":
   			case "postapo":
   				return "Post-apokalyptinen";
   			case "historical":
@@ -148,8 +161,10 @@
   				return "Kauhu";
   			case "reality":
   				return "Realismi";
+  			case "city larp":
   			case "city":
   				return "Kaupunkipeli";
+  			case "new weird":
   			case "newweird":
   				return "Uuskumma";
   			case "action":
@@ -162,6 +177,42 @@
   		
   		return null;
   	}
+  	
+  	private function listIllusionTypes() {
+  		$response = $this->createClient()->get("$this->base_url/rest/illusion/types");
+  		
+  		if ($response->getStatusCode() == 200) {
+  			return $response->json();
+  		}
+  		
+  		return null;
+  	}
+  	
+  	private function getIllusionTypeMap() {
+  		$result = [];
+  		
+  	  foreach ($this->listIllusionTypes() as $illusionType) {
+  	  	$result[$illusionType['name']] = $illusionType['id'];
+  		}
+  		
+  		return $result;
+  	}
+  	
+  	private function getTypeName($type) {
+  		// TODO: This mapping should be in database
+  		switch ($type) {
+        case "2": 
+        	return "Larpit";
+        case "3": 
+        	return "Conit ja miitit";
+        case "4": 
+        	return "Kurssit ja työpajat";
+        case "5": 
+        	return "Muut";
+  		}
+  		
+  		return null;
+   	}
 
   	private function createClient() {
   		$handler = new GuzzleHttp\Ring\Client\StreamHandler();
