@@ -140,42 +140,77 @@ function getListOfEvents($month, $day, $year) {
     }
 }
 
-function getCeventObject($id) {
-    if (file_exists('./dat/connectDB.php')) {
-        require_once ('./dat/connectDB.php');
-    } else {
-        require_once ('./../dat/connectDB.php');
-    }
-    if (file_exists('./dat/cEvent.php')) {
-        require_once ('./dat/cEvent.php');
-    } else {
-        require_once ('./../dat/cEvent.php');
-    }
-
-		$result = dbQueryP(
+function getEventData($id) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$result = dbQueryP(
 			"select
-			  id, eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, 
+			  id, eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime,
 			  locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
 				invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
 				link1, link2, status, password, illusionId
-			from 
+			from
 			  events
-			where 
+			where
 			  id = $1", [$id]);
+	
+	if ($result) {
+		$row = pg_fetch_assoc($result);
 		
-		if ($result) {
-			$row = pg_fetch_assoc($result);
-			return new cEvent($row['id'], $row['eventname'], $row['eventtype'], $row['startdate'], $row['enddate'], $row['datetextfield'], 
-					$row['startsignuptime'], $row['endsignuptime'], $row['locationdropdown'], $row['locationtextfield'], $row['iconurl'], 
-					$row['genre'], $row['cost'], $row['agelimit'], $row['beginnerfriendly'], $row['storydescription'], $row['infodescription'], 
-					$row['organizername'], $row['organizeremail'], $row['link1'], $row['link2'], $row['status'], $row['password'], $row['eventfull'], 
-					$row['invitationonly'], $row['languagefree'], $row['illusionid']); 
-		}
-		
-		return null;
+		return [
+		  'id' => intval($row['id']),
+			'name' => $row['eventname'],
+			'type' => intval($row['eventtype']),
+			'start' => (new DateTime())->setTimestamp(intval($row['startdate'])),
+			'end' => (new DateTime())->setTimestamp(intval($row['enddate'])),
+			'textDate' => $row['datetextfield'],			
+			'signUpStart' => (new DateTime())->setTimestamp(intval($row['startsignuptime'])),
+			'signUpEnd' => (new DateTime())->setTimestamp(intval($row['endsignuptime'])),
+			'location' => $row['locationtextfield'],
+			'iconURL' => $row['iconurl'],
+			'genres' => $row['genre'] ? explode(",", $row['genre']) : [],
+			'cost' => $row['cost'],
+			'ageLimit' => $row['agelimit'],
+			'beginnerFriendly' => $row['beginnerfriendly'] == 't',
+			'storyDescription' => $row['storydescription'],
+			'infoDescription' => $row['infodescription'],
+			'organizerName' => $row['organizername'],
+			'organizerEmail' => $row['organizeremail'],
+			'link1' => $row['link1'],
+			'link2' => $row['link2'],
+			'status' => $row['status'],
+			'password' => $row['password'],
+			'eventFull' => $row['eventfull'] == 't',
+			'invitationOnly' => $row['invitationonly'] == 't',
+			'languageFree' => $row['languagefree'] == 't',
+			'illusionId' => intval($row['illusionid'])
+		];
+	}
+	
+	return null;
 }
 
-
+function getCeventObject($id) {
+	if (file_exists ( './dat/connectDB.php' )) {
+		require_once ('./dat/connectDB.php');
+	} else {
+		require_once ('./../dat/connectDB.php');
+	}
+	if (file_exists ( './dat/cEvent.php' )) {
+		require_once ('./dat/cEvent.php');
+	} else {
+		require_once ('./../dat/cEvent.php');
+	}
+	$query = "SELECT * FROM events WHERE id = '$id';";
+	$result = dbQuery ( $query );
+	if ($result != null) {
+		$row = pg_fetch_row ( $result );
+		$event = new cEvent ( $row [0], $row [1], $row [2], $row [3], $row [4], $row [5], $row [6], $row [7], $row [8], $row [9], $row [10], $row [11], $row [12], $row [13], $row [14], $row [15], $row [16], $row [17], $row [18], $row [19], $row [20], $row [21], $row [22] );
+		return $event;
+	} else {
+		return null;
+	}
+}
 
 function getListOfEventsForApproval() {
     if (file_exists('./dat/connectDB.php')) {
