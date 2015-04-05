@@ -7,7 +7,7 @@ use WireMock\Client\JsonValueMatchingStrategy;
 
 class CreateEventTests extends PHPUnit_Framework_TestCase {
 	
-	private $base_url = "http://localhost";
+	private $base_url = "http://kalenteri.larp.dev";
 	protected $webDriver;
 
   public function setUp() {
