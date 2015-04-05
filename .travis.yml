@@ -1,0 +1,5 @@
+language: php
+before_install:
+  - composer install
+php:
+  - 5.6
