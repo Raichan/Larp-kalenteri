@@ -1,19 +1,19 @@
 language: php
 before_install:
+- sudo apt-get update
+- sudo apt-get install apache2 libapache2-mod-php5
+- sudo cp ~/foyt/Larp-kalenteri/build/tests/a2_virtualhost.conf /etc/apache2/sites-available/lk
+- sudo a2ensite lk
+- sudo service apache2 restart
 - composer install
 - wget http://repo1.maven.org/maven2/com/github/tomakehurst/wiremock/1.54/wiremock-1.54-standalone.jar -O ~/wiremock-standalone.jar
 - java -jar ~/wiremock-standalone.jar --https-port 8443 --port 8080 --bind-address test.forgeandillusion.net --https-keystore ./tests/test.forgeandillusion.net.keystore &
 - sleep 3
-before_script:
-- sudo apt-get update
-- sudo apt-get install apache2 libapache2-mod-php5
-- sudo cp build/tests/a2_virtualhost.conf /etc/apache2/sites-available/lk
-- sudo a2ensite lk
-- sudo service apache2 restart
 php:
 - 5.6
 addons:
   sauce_connect: true
+  postgresql: "9.3"
 env:
   global:
   - secure: ZtcET/V0ewOgWTAcmnFuAiGmJcarUF0CyU1vgf3zmW0xEMAkK6iBlNamAh7cfTZK7ZKLFvObCbSbxx8DlSo+yknJmjzMgveOcoNNdU/su46AdWYtRzIJIymxJYPDxobDJJHvktN3MwQP/1LHVnhSOzYaIhUusKfUobz95YvRZHc=
