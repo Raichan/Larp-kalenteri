@@ -11,14 +11,15 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 	protected $webDriver;
 
   public function setUp() {
-  	$sauceUser = $_ENV["SAUCE_USERNAME"];
-  	$sauceKey = $_ENV["SAUCE_ACCESS_KEY"];
-  	$sauceTunnel = $_ENV["TRAVIS_JOB_NUMBER"];
+	  $sauceUser = getenv("SAUCE_USERNAME");
+  	$sauceKey = getenv("SAUCE_ACCESS_KEY");
+  	$sauceTunnel = getenv("TRAVIS_JOB_NUMBER");
   	
   	if (!empty($sauceUser) && !empty($sauceKey) && !empty($sauceTunnel)) {
   		// Travis / Sauce Labs
-  		$capabilities = array(\WebDriverCapabilityType::BROWSER_NAME => 'firefox', 'tunnel-identifier' => $sauceTunnel);
-  		$this->webDriver = RemoteWebDriver::create("$sauceUser:%$sauceKey@localhost:4445", $capabilities);
+  		$capabilities = DesiredCapabilities::firefox();
+//   		$capabilities->setCapability("tunnel-identifier", $sauceTunnel);
+  		$this->webDriver = RemoteWebDriver::create("http://$sauceUser:$sauceKey@ondemand.saucelabs.com:80/wd/hub", $capabilities);
   	} else {
   		// Local
   		$this->webDriver = RemoteWebDriver::create("http://localhost:4444/wd/hub", array(\WebDriverCapabilityType::BROWSER_NAME => 'firefox'));
