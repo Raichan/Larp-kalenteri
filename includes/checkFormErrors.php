@@ -35,6 +35,17 @@ function dateToTimestampstring($date) {
     return strval($timestamp);
 }
 
+function strToDate($str) {
+	if (empty($str)) {
+		return null;
+	}
+	
+	return (new DateTime())
+	  ->setTimezone(new DateTimeZone("UTC"))
+	  ->setTimestamp(intval($str))
+	  ->setTime(0, 0, 0);
+}
+
 // DELETE THIS AFTERWARDS
 function debug_to_console($data) {
 
@@ -321,11 +332,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         			$beginnerfriendly != "false", 
         			$icon, 
         			$typeId, 
-        			(new DateTime())->setTimestamp(intval($signupstart)), 
-        			(new DateTime())->setTimestamp(intval($signupend)), 
+        			strToDate($signupstart), 
+        			strToDate($signupend), 
         			null, 
-        			(new DateTime())->setTimestamp(intval($datestart)), 
-        			(new DateTime())->setTimestamp(intval($dateend)), 
+        			strToDate($datestart), 
+        			strToDate($dateend), 
         			$genreIds
         	);
         	
