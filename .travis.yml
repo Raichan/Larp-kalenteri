@@ -14,6 +14,8 @@ before_install:
 - cp ./tests/fni.config ./illusion/config.php
 - sudo -u postgres psql postgres -f ./tests/sql/database.sql
 - sudo -u postgres psql larpfi -f ./tests/sql/tables.sql
+- sudo apt-add-repository ppa:ondrej/apache2
+- sudo apt-add-repository ppa:ondrej/php5
 - sudo apt-get update
 - sudo apt-get install apache2 libapache2-mod-php5 php5-pgsql
 - sudo cp -v ./tests/a2_virtualhost.conf /etc/apache2/sites-available/lk
