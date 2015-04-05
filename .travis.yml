@@ -1,6 +1,12 @@
 sudo: false
 language: php
 before_install:
-  - composer install
+- composer install
 php:
-  - 5.6
+- 5.6
+addons:
+  sauce_connect: true
+env:
+  global:
+  - secure: ZtcET/V0ewOgWTAcmnFuAiGmJcarUF0CyU1vgf3zmW0xEMAkK6iBlNamAh7cfTZK7ZKLFvObCbSbxx8DlSo+yknJmjzMgveOcoNNdU/su46AdWYtRzIJIymxJYPDxobDJJHvktN3MwQP/1LHVnhSOzYaIhUusKfUobz95YvRZHc=
+  - secure: AIYs9kx9If7X631dfzYNses+51rLpYMUoXTiCCqu5NUj0ej79LkfETFEbOZ07puhh/zTMB1k2m7VXtPYinW4Yk8uEnZrFP2neunYRWRxgT7HlSfS5PK1G1wkbwkM3OiHYoMJNGy0YdFpaOJe5e4Xrzzn0kc5mxitFuenYsIuU6c=
