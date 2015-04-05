@@ -15,26 +15,29 @@
   		$this->client_secret = $client_secret;
   	}
   	
-  	public function createEvent($published, $name, $description, $urlName, $joinMode, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $startDate, $endDate, $genreIds) {
+  	public function createEvent($published, $name, $description, $urlName, $joinMode, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $start, $end, $genreIds) {
   		$event = array(
-  		  "published" => $published,
-  			"name" => $name,
-  			"description" => $description,
-  			"urlName" => $urlName,
-  			"joinMode" => $joinMode,
-  			"signUpFee" => $signUpFee,
-  			"signUpFeeCurrency" => $signUpFeeCurrency,
-  		  "location" => $location,
-  			"ageLimit" => $ageLimit,
-  			"beginnerFriendly" => $beginnerFriendly,
-  			"imageUrl" => $imageUrl,
-  			"typeId" => $typeId,
-  			"signUpStartDate" => $signUpStartDate->format('c'),
-  			"signUpEndDate" => $signUpEndDate->format('c'),
-  			"domain" => $domain,
-  			"start" => $startDate->format('c'),
-  			"end" => $endDate->format('c'),
-  			"genreIds" => $genreIds
+  			'id' => null,
+  			'published' => $published,
+  			'name' => $name,
+  			'description' => $description,
+  			'created' => null,
+  			'urlName' => $urlName,
+  			'xmppRoom' => null,
+  			'joinMode' => $joinMode,
+  			'signUpFee' => $signUpFee,
+  			'signUpFeeCurrency' => $signUpFeeCurrency,
+  			'location' => $location,
+  			'ageLimit' => empty($ageLimit) ? null : $ageLimit,
+  			'beginnerFriendly' => $beginnerFriendly,
+  			'imageUrl' => empty($imageUrl) ? null : $imageUrl,
+  			'typeId' => $typeId,
+  			'signUpStartDate' => $signUpStartDate ? $signUpStartDate->format('c') : null,
+  			'signUpEndDate' => $signUpEndDate ? $signUpEndDate->format('c') : null,
+  			'domain' => $domain,
+  			'start' => $start->format('c'),
+  			'end' => $end->format('c'),
+  			'genreIds' => $genreIds
   		);
   		
   		$response = $this->createClient()->post("$this->base_url/rest/illusion/events", [
@@ -123,8 +126,10 @@
   	public function createUser($email, $firstName, $lastName, $locale, $password) {
   		$response = $this->createClient()->post("$this->base_url/rest/users/users", [
   			'json' => [
+  				'id' => null,
   				'firstName' => $firstName,
   				'lastName' => $lastName,
+  				'nickname' => null,
   				'locale' => $locale,
   		    'emails' => [ $email ]
   			],
@@ -145,8 +150,10 @@
   	public function createEventParticipant($eventId, $userId, $role) {
   		$response = $this->createClient()->post("$this->base_url/rest/illusion/events/$eventId/participants", [
   		  'json' => [
-  				'userId' => $userId,
-  		  	'role' => $role
+  				'id' => null,
+					'userId' => $userId,
+					'role' => $role,
+		  	  'displayName' => null
   			]
   		]);
   	
