@@ -19,7 +19,6 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install apache2 libapache2-mod-php5 php5-pgsql
 - sudo cp -v ./tests/a2_virtualhost.conf /etc/apache2/sites-available/lk
-- sudo a2dissite default
 - sudo a2ensite lk
 - sudo service apache2 restart
 - curl http://kalenteri.larp.dev/
