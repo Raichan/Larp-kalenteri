@@ -152,7 +152,7 @@ function getEventData($id) {
 			from
 			  events
 			where
-			  id = $1", [$id]);
+			  id = $1",array($id));
 	
 	if ($result) {
 		$row = pg_fetch_assoc($result);
