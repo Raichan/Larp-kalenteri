@@ -3,7 +3,7 @@ language: php
 before_install:
 - composer install
 - wget http://repo1.maven.org/maven2/com/github/tomakehurst/wiremock/1.54/wiremock-1.54-standalone.jar -O ~/wiremock-standalone.jar
-- java -jar ~/wiremock-standalone.jar --https-port 8443 --port 8080 --bind-address test.forgeandillusion.net --https-keystore ./tests/forgeandillusion.net.keystore
+- java -jar ~/wiremock-standalone.jar --https-port 8443 --port 8080 --bind-address test.forgeandillusion.net --https-keystore ./tests/test.forgeandillusion.net.keystore
 php:
 - 5.6
 addons:
