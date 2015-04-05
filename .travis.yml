@@ -11,6 +11,8 @@ env:
   - secure: ZtcET/V0ewOgWTAcmnFuAiGmJcarUF0CyU1vgf3zmW0xEMAkK6iBlNamAh7cfTZK7ZKLFvObCbSbxx8DlSo+yknJmjzMgveOcoNNdU/su46AdWYtRzIJIymxJYPDxobDJJHvktN3MwQP/1LHVnhSOzYaIhUusKfUobz95YvRZHc=
   - secure: AIYs9kx9If7X631dfzYNses+51rLpYMUoXTiCCqu5NUj0ej79LkfETFEbOZ07puhh/zTMB1k2m7VXtPYinW4Yk8uEnZrFP2neunYRWRxgT7HlSfS5PK1G1wkbwkM3OiHYoMJNGy0YdFpaOJe5e4Xrzzn0kc5mxitFuenYsIuU6c=
 before_install:
+- sudo -u postgres psql postgres -f ./tests/sql/database.sql
+- sudo -u postgres psql larpfi -f ./tests/sql/tables.sql
 - sudo apt-get update
 - sudo apt-get install apache2 libapache2-mod-php5
 - sudo cp -v ./tests/a2_virtualhost.conf /etc/apache2/sites-available/lk

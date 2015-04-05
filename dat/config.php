@@ -11,11 +11,11 @@ define('DB_PORT', '5432');
 /* ! \enum DB_USER
  * Username.
  */
-define('DB_USER', 'raichan');
+define('DB_USER', 'larpfi');
 /* ! \enum DB_PASSWORD
  * Password.
  */
-define('DB_PASSWORD', 'raimaifai');
+define('DB_PASSWORD', 'larpfi');
 /* ! \enum DB_DATABASE
  * Database name.
  */
