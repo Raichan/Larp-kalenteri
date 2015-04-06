@@ -279,6 +279,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$type = 3; // Conit ja miitit
   	$startUI = "01/01/2015";
   	$endUI = "02/01/2015";
+  	$startREST = $this->getISODate(2015, 1, 1);
+  	$endREST = $this->getISODate(2015, 1, 2);
   	$signupStartUI = "03/01/2015";
   	$signupEndUI =  "04/01/2015";
   	$signupStartREST = $this->getISODate(2015, 1, 3);
