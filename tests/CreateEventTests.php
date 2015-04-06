@@ -267,112 +267,112 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 //   	$this->deleteAllEvents();	
 //   }
     
-  public function testCreateEventFillAllFnI() {
-  	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
-  	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
-  	$wireMock->reset();
+//   public function testCreateEventFillAllFnI() {
+//   	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
+//   	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
+//   	$wireMock->reset();
   	
-  	$this->webDriver->get("$this->base_url/createEvent.php");
-  	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
+//   	$this->webDriver->get("$this->base_url/createEvent.php");
+//   	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
   
-  	$name = "Test Event";
-  	$type = 3; // Conit ja miitit
-  	$startUI = "01/01/2015";
-  	$endUI = "02/01/2015";
-  	$signupStartUI = "03/01/2015";
-  	$signupEndUI =  "04/01/2015";
-  	$signupStartREST = $this->getISODate(2015, 1, 3);
-  	$signupEndREST = $this->getISODate(2015, 1, 4);
-  	$startREST = $this->getISODate(2015, 1, 1);
-  	$endREST = $this->getISODate(2015, 1, 2);
-  	$location1 = 7; // Lappi
-  	$location2 = "Testia";
-  	$icon = "http://upload.wikimedia.org/wikipedia/commons/3/34/Boj_na_mBPA.jpg";
-  	$cost = "22";
-  	$ageLimit = 16;
-  	$storyDesc = "Uneventful test where participants may only watch whats happening";
-  	$infoDesc = "Event for automatic testing";
-  	$organizerName = "John Doe";
-  	$organizerEmail = "john.doe@example.com";
-    $website1 = "http://web1.example.com";
-    $website2 = "http://web2.example.com";
+//   	$name = "Test Event";
+//   	$type = 3; // Conit ja miitit
+//   	$startUI = "01/01/2015";
+//   	$endUI = "02/01/2015";
+//   	$signupStartUI = "03/01/2015";
+//   	$signupEndUI =  "04/01/2015";
+//   	$signupStartREST = $this->getISODate(2015, 1, 3);
+//   	$signupEndREST = $this->getISODate(2015, 1, 4);
+//   	$startREST = $this->getISODate(2015, 1, 1);
+//   	$endREST = $this->getISODate(2015, 1, 2);
+//   	$location1 = 7; // Lappi
+//   	$location2 = "Testia";
+//   	$icon = "http://upload.wikimedia.org/wikipedia/commons/3/34/Boj_na_mBPA.jpg";
+//   	$cost = "22";
+//   	$ageLimit = 16;
+//   	$storyDesc = "Uneventful test where participants may only watch whats happening";
+//   	$infoDesc = "Event for automatic testing";
+//   	$organizerName = "John Doe";
+//   	$organizerEmail = "john.doe@example.com";
+//     $website1 = "http://web1.example.com";
+//     $website2 = "http://web2.example.com";
     
-    $this->findElement("#eventname")->sendKeys($name);
-    $this->select("#eventtype", $type);
-    $this->findElement("#datestart")->sendKeys($startUI);
-    $this->findElement("#dateend")->sendKeys($endUI);
-    $this->findElement("#signupstart")->sendKeys($signupStartUI);
-    $this->findElement("#signupend")->sendKeys($signupEndUI);
-    $this->select("#location1", $location1);
-    $this->findElement("#location2")->sendKeys($location2);
-    $this->findElement("#icon")->sendKeys($icon);
-    $this->toggleCheckboxes("input[name*=\"genre\"]");
-    $this->findElement("#cost")->sendKeys($cost);
-    $this->findElement("#agelimit")->sendKeys($ageLimit);
-    $this->toggleCheckboxes("#beginnerfriendly");
-    $this->toggleCheckboxes("#eventfull");
-    $this->toggleCheckboxes("#invitationonly");
-    $this->toggleCheckboxes("#languagefree");
-    $this->findElement("#storydesc")->sendKeys($storyDesc);
-    $this->findElement("#infodesc")->sendKeys($infoDesc);
-    $this->findElement("#organizername")->sendKeys($organizerName);
-    $this->findElement("#organizeremail")->sendKeys($organizerEmail);
-    $this->findElement("#website1")->sendKeys($website1);
-    $this->findElement("#website2")->sendKeys($website2);
+//     $this->findElement("#eventname")->sendKeys($name);
+//     $this->select("#eventtype", $type);
+//     $this->findElement("#datestart")->sendKeys($startUI);
+//     $this->findElement("#dateend")->sendKeys($endUI);
+//     $this->findElement("#signupstart")->sendKeys($signupStartUI);
+//     $this->findElement("#signupend")->sendKeys($signupEndUI);
+//     $this->select("#location1", $location1);
+//     $this->findElement("#location2")->sendKeys($location2);
+//     $this->findElement("#icon")->sendKeys($icon);
+//     $this->toggleCheckboxes("input[name*=\"genre\"]");
+//     $this->findElement("#cost")->sendKeys($cost);
+//     $this->findElement("#agelimit")->sendKeys($ageLimit);
+//     $this->toggleCheckboxes("#beginnerfriendly");
+//     $this->toggleCheckboxes("#eventfull");
+//     $this->toggleCheckboxes("#invitationonly");
+//     $this->toggleCheckboxes("#languagefree");
+//     $this->findElement("#storydesc")->sendKeys($storyDesc);
+//     $this->findElement("#infodesc")->sendKeys($infoDesc);
+//     $this->findElement("#organizername")->sendKeys($organizerName);
+//     $this->findElement("#organizeremail")->sendKeys($organizerEmail);
+//     $this->findElement("#website1")->sendKeys($website1);
+//     $this->findElement("#website2")->sendKeys($website2);
     
-  	$this->findElement("#save")->click();
+//   	$this->findElement("#save")->click();
   
-  	// Verify that event API call was not made
+//   	// Verify that event API call was not made
   	
-  	$wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
+//   	$wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
   	
-  	// Verify API calls
+//   	// Verify API calls
     
-    // Verify new event
-    $wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events'))
-     		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
-    		  false,
-    		  $name,
-	    		$description,
-	    		null,
-	    		null,
-	    		null,
-	    		"OPEN",
-	    		null,
-	    		"EUR",
-	    		$location,
-	    		$ageLimit,
-	    		true,
-	    		$icon,
-	    		$type,
-	    		$signupStartREST,
-	    		$signupEndREST,
-	    		null,
-	    		$startREST,
-	    		$endREST,
-	    		[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
-     		)
-     	)
-    );
+//     // Verify new event
+//     $wireMock->verify(1, 
+//       WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events'))
+//      		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
+//     		  false,
+//     		  $name,
+// 	    		$description,
+// 	    		null,
+// 	    		null,
+// 	    		null,
+// 	    		"OPEN",
+// 	    		null,
+// 	    		"EUR",
+// 	    		$location,
+// 	    		$ageLimit,
+// 	    		true,
+// 	    		$icon,
+// 	    		$type,
+// 	    		$signupStartREST,
+// 	    		$signupEndREST,
+// 	    		null,
+// 	    		$startREST,
+// 	    		$endREST,
+// 	    		[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
+//      		)
+//      	)
+//     );
     
-    // Verify new user
-    $wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlMatching('/fni/rest/users/users.*'))
-     		-> withRequestBody(WireMock::equalToJson($this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail)))
-    );
+//     // Verify new user
+//     $wireMock->verify(1, 
+//       WireMock::postRequestedFor(WireMock::urlMatching('/fni/rest/users/users.*'))
+//      		-> withRequestBody(WireMock::equalToJson($this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail)))
+//     );
     
-    // Verify organizer
+//     // Verify organizer
     
-    $wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
-     		-> withRequestBody(WireMock::equalToJson($this->createEventParticipantJson(null, 1234, "ORGANIZER", null)))
-    );
+//     $wireMock->verify(1, 
+//       WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
+//      		-> withRequestBody(WireMock::equalToJson($this->createEventParticipantJson(null, 1234, "ORGANIZER", null)))
+//     );
   	
-  	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+//   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
-  	$this->deleteAllEvents();	
-  }
+//   	$this->deleteAllEvents();	
+//   }
   
   // TODO: testCreateEventAdmin()
   // TODO: testCreateEventAdminFnI()
