@@ -251,7 +251,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     $this->findElement("#organizername")->sendKeys($organizerName);
     $this->findElement("#organizeremail")->sendKeys($organizerEmail);
     $this->findElement("#website1")->sendKeys($website1);
-    $this->findElement("#website1")->sendKeys($website2);
+    $this->findElement("#website2")->sendKeys($website2);
     $this->toggleCheckboxes("#illusionsync");
     
   	$this->findElement("#save")->click();
@@ -324,7 +324,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   }
   
   protected function findElements($selector) {
-  	return $this->webDriver->findElement(WebDriverBy::cssSelector($selector));
+  	return $this->webDriver->findElements(WebDriverBy::cssSelector($selector));
   }
   
   protected function select($selector, $value) {
