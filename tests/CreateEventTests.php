@@ -10,6 +10,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 	
 	private $base_url = "http://kalenteri.larp.dev";
 	protected $webDriver;
+	protected $capabilities;
 
   public function setUp() {
 	  $sauceUser = getenv("SAUCE_USERNAME");
@@ -18,16 +19,17 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	
   	if (!empty($sauceUser) && !empty($sauceKey) && !empty($travisJobNumber)) {
   		// Travis / Sauce Labs
-  		$capabilities = DesiredCapabilities::chrome();
-   		$capabilities->setCapability("tunnel-identifier", $travisJobNumber);
-   		$capabilities->setCapability("name", $this->getName());
-   		$capabilities->setCapability("build", $travisJobNumber);
+  		$this->capabilities = DesiredCapabilities::chrome();
+   		$this->capabilities->setCapability("tunnel-identifier", $travisJobNumber);
+   		$this->capabilities->setCapability("name", $this->getName());
+   		$this->capabilities->setCapability("build", $travisJobNumber);
    		
-  		$this->webDriver = RemoteWebDriver::create("http://$sauceUser:$sauceKey@ondemand.saucelabs.com:80/wd/hub", $capabilities);
+  		$this->webDriver = RemoteWebDriver::create("http://$sauceUser:$sauceKey@ondemand.saucelabs.com:80/wd/hub", $this->capabilities);
   	} else {
   		echo "Using local webdriver";
   		// Local
-  		$this->webDriver = RemoteWebDriver::create("http://localhost:4444/wd/hub", array(\WebDriverCapabilityType::BROWSER_NAME => 'firefox'));
+  		$this->capabilities = DesiredCapabilities::chrome();
+  		$this->webDriver = RemoteWebDriver::create("http://localhost:4444/wd/hub", $this->capabilities);
   	}
   }
   
@@ -61,8 +63,13 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$this->findElement("#location2")->sendKeys($location);
   	$this->findElement("#infodesc")->sendKeys($description);
   	$this->findElement("#organizername")->sendKeys($organizerName);
-  	$this->findElement("#organizeremail")->sendKeys($organizerEmail);
-  	$this->findElement("#illusionsync")->click();
+  	$this->findElement("#organizeremail")->sendKeys($organizerEmail);	
+  	
+  	if ($this->capabilities->getBrowserName() == 'firefox') {
+  	  $this->findElement("#illusionsync")->click();
+  	} else {
+  		$this->findElement("#illusionsync")->sendKeys(WebDriverKeys::SPACE);
+  	}
   	
   	$this->findElement("#save")->click();
   
