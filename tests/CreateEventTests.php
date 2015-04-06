@@ -373,7 +373,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   
   protected function verifyRequest($count, $requestPattern, $body) {
   	try {
-  		$this->wireMock->verify($count, $requestPattern -> withRequestBody(WireMock::equalToJson(body) ));
+  		$this->wireMock->verify($count, $requestPattern -> withRequestBody(WireMock::equalToJson($body) ));
   	} catch (VerificationException $e) {
   		foreach ($this->wireMock->findAll($requestPattern) as $logged) {
   			$this->fail("Request verification failed: Expected $body but received $logged->getBody()");
