@@ -210,6 +210,12 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 
   	$this->deleteAllEvents();	
   }
+  // TODO: testCreateEventFillAll()
+  // TODO: testCreateEventFillAll()
+  // TODO: testCreateEventAdmin()
+  // TODO: testCreateEventAdminFnI()
+  // TODO: testCreateEventFillAllAdmin()
+  // TODO: testCreateEventFillAllAdminFnI()
   
   private function getISODate($year, $month, $day) {
   	return (new DateTime())
