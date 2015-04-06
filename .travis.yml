@@ -13,7 +13,9 @@ env:
 before_install:
 - cp ./tests/fni.config ./illusion/config.php
 - sudo -u postgres psql postgres -f ./tests/sql/database.sql
-- sudo -u postgres psql larpfi -f ./tests/sql/tables.sql
+- sudo sed -i 's/^local\s\+all\s\+all\s\+peer/local all all md5/g' /etc/postgresql/9.3/main/pg_hba.conf
+- export PGPASSWORD=larpfi
+- psql -U larpfi larpfi -f ./tests/sql/tables.sql
 - sudo apt-add-repository -y ppa:ondrej/apache2
 - sudo apt-add-repository -y ppa:ondrej/php5
 - sudo apt-get update
