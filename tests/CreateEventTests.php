@@ -1,6 +1,7 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../dat/config.php';
 
 use WireMock\Client\WireMock;
 use WireMock\Client\JsonValueMatchingStrategy;
@@ -13,14 +14,17 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   public function setUp() {
 	  $sauceUser = getenv("SAUCE_USERNAME");
   	$sauceKey = getenv("SAUCE_ACCESS_KEY");
-  	$sauceTunnel = getenv("TRAVIS_JOB_NUMBER");
+  	$travisJobNumber = getenv("TRAVIS_JOB_NUMBER");
   	
-  	if (!empty($sauceUser) && !empty($sauceKey) && !empty($sauceTunnel)) {
-  		echo "Using Sauce Labs";
+  	if (!empty($sauceUser) && !empty($sauceKey) && !empty($travisJobNumber)) {
+  		echo "Using Sauce Labs\n";
+   		echo 'Tunnel id: ' . $capabilities->getCapability("tunnel-identifier") . '\n';
   		// Travis / Sauce Labs
   		$capabilities = DesiredCapabilities::chrome();
-   		$capabilities->setCapability("tunnel-identifier", $sauceTunnel);
-   		echo 'Tunnel id: ' . $capabilities->getCapability("tunnel-identifier");
+   		$capabilities->setCapability("tunnel-identifier", $travisJobNumber);
+   		$capabilities->setCapability("name", $this->getName());
+   		$capabilities->setCapability("build", $travisJobNumber);
+   		
   		$this->webDriver = RemoteWebDriver::create("http://$sauceUser:$sauceKey@ondemand.saucelabs.com:80/wd/hub", $capabilities);
   	} else {
   		echo "Using local webdriver";
@@ -33,7 +37,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
    	$this->webDriver->quit();
   }
   
-  public function testCreateEventI() {
+  public function testCreateEvent() {
   	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
   	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
   	$wireMock->reset();
@@ -69,6 +73,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
   	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+  	
+  	$this->deleteAllEvents();	
   }
   
   public function testCreateEventFnI() {
@@ -195,6 +201,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     );
     
     $this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+
+  	$this->deleteAllEvents();	
   }
   
   private function getISODate($year, $month, $day) {
@@ -297,5 +305,10 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 		]);
   }
   
+  private function deleteAllEvents() {
+  	$d = "host=" . DB_SERVER . " port=" . DB_PORT . " dbname=" . DB_DATABASE . " user=" . DB_USER . " password=" . DB_PASSWORD;
+  	$dbconn = pg_connect($d) or die('Could not connect to DB: ' . pg_last_error());
+  	$result = pg_query("delete from events") or die('Query failed: ' . pg_last_error());
+  }
 }
 ?>
