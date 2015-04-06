@@ -18,8 +18,9 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	if (!empty($sauceUser) && !empty($sauceKey) && !empty($sauceTunnel)) {
   		echo "Using Sauce Labs";
   		// Travis / Sauce Labs
-  		$capabilities = DesiredCapabilities::firefox();
-//   		$capabilities->setCapability("tunnel-identifier", $sauceTunnel);
+  		$capabilities = DesiredCapabilities::chrome();
+   		$capabilities->setCapability("tunnel-identifier", $sauceTunnel);
+   		echo 'Tunnel id: ' . $capabilities->getCapability("tunnel-identifier");
   		$this->webDriver = RemoteWebDriver::create("http://$sauceUser:$sauceKey@ondemand.saucelabs.com:80/wd/hub", $capabilities);
   	} else {
   		echo "Using local webdriver";
