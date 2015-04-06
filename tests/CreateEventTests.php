@@ -9,9 +9,10 @@ use WireMock\Client\JsonValueMatchingStrategy;
 class CreateEventTests extends PHPUnit_Framework_TestCase {
 	
 	private $base_url = "http://kalenteri.larp.dev";
+	protected $wireMock;
 	protected $webDriver;
 	protected $capabilities;
-
+	
   public function setUp() {
 	  $sauceUser = getenv("SAUCE_USERNAME");
   	$sauceKey = getenv("SAUCE_ACCESS_KEY");
@@ -32,16 +33,17 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   		$this->capabilities = DesiredCapabilities::chrome();
   		$this->webDriver = RemoteWebDriver::create("http://localhost:4444/wd/hub", $this->capabilities);
   	}
+  	
+  	$this->wireMock = WireMock::create("test.forgeandillusion.net", '8080');
+  	$this->assertEquals($this->wireMock->isAlive(), true, "WireMock is not alive");
   }
   
   public function tearDown() {
    	$this->webDriver->quit();
+  	$this->wireMock->reset();
   }
   
   public function testCreateEvent() {
-  	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
-  	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
-  	$wireMock->reset();
   	 
   	$this->webDriver->get("$this->base_url/createEvent.php");
   	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
@@ -71,7 +73,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   
   	// Verify that event API call was not made
   	
-  	$wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
+  	$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
   	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
@@ -79,11 +81,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   }
   
   public function testCreateEventFnI() {
-  	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
-  	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
-  	$wireMock->reset();
-  	
-    $this->webDriver->get("$this->base_url/createEvent.php");
+  	$this->webDriver->get("$this->base_url/createEvent.php");
     $this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
 
     $name = "Test Event";
@@ -98,55 +96,35 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     
     // FnI API stubs
     
-		$this->stubAccessToken($wireMock, "fake-token");
-    $this->stubEventGenres($wireMock);
-    $this->stubEventTypes($wireMock);
-    $this->stubUsersFindEmpty($wireMock, $organizerEmail);
-    
-    $wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/rest/illusion/events'))
-      ->willReturn(WireMock::aResponse()
-    	  ->withStatus(200)
-    		  ->withHeader('Content-Type', 'application/json')
-    			->withBody($this->createEventJson(123, 
-    					false, 
-    					$name, 
-    					null, 
-    					$this->getISODate(2015, 1, 1), 
-    					"test_event", 
-    					"test_event@muc.example.com", 
-    					"OPEN", 
-    					null, 
-    					null, 
-    					$location, 
-    					null, 
-    					false, 
-    					null, 
-    					1, 
-    					null,
-    					null, 
-    					null,
-    					$startREST, 
-    					$endREST, 
-    					[]))
-    		)
+		$this->stubAccessToken("fake-token");
+    $this->stubEventGenres();
+    $this->stubEventTypes();
+    $this->stubUsersFindEmpty($organizerEmail);
+    $this->stubUserCreate($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail));
+    $this->stubEventParticipantCreate($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
+    $this->stubEventCreate($this->createEventJson(123, 
+      false, 
+    	$name, 
+    	null, 
+    	$this->getISODate(2015, 1, 1), 
+    	"test_event", 
+    	"test_event@muc.example.com", 
+    	"OPEN", 
+    	null, 
+    	null, 
+    	$location, 
+    	null, 
+    	false, 
+    	null, 
+    	1, 
+    	null,
+    	null, 
+    	null,
+    	$startREST, 
+    	$endREST, 
+    	[])
     );
-    
-    $wireMock->stubFor(WireMock::post(WireMock::urlMatching('/fni/rest/users/users.*'))
-      ->willReturn(WireMock::aResponse()
-    	  ->withStatus(200)
-    		  ->withHeader('Content-Type', 'application/json')
-    			->withBody($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail))
-    		)
-    );
-    
-    $wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
-      ->willReturn(WireMock::aResponse()
-    	  ->withStatus(200)
-    		  ->withHeader('Content-Type', 'application/json')
-    			->withBody($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null))
-    		)
-    );
-    
+     
     // Create event
     
     $this->findElement("#eventname")->sendKeys($name);
@@ -161,7 +139,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     // Verify API calls
     
     // Verify new event
-    $wireMock->verify(1, 
+    $this->wireMock->verify(1, 
       WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events'))
      		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
     		  false,
@@ -189,14 +167,14 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     );
     
     // Verify new user
-    $wireMock->verify(1, 
+    $this->wireMock->verify(1, 
       WireMock::postRequestedFor(WireMock::urlMatching('/fni/rest/users/users.*'))
      		-> withRequestBody(WireMock::equalToJson($this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail)))
     );
     
     // Verify organizer
     
-    $wireMock->verify(1, 
+    $this->wireMock->verify(1, 
       WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
      		-> withRequestBody(WireMock::equalToJson($this->createEventParticipantJson(null, 1234, "ORGANIZER", null)))
     );
@@ -207,10 +185,6 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   }
     
   public function testCreateEventFillAll() {
-  	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
-  	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
-  	$wireMock->reset();
-  	
   	$this->webDriver->get("$this->base_url/createEvent.php");
   	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
   
@@ -260,7 +234,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   
   	// Verify that event API call was not made
   	
-  	$wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
+  	$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
   	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
@@ -268,10 +242,6 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   }
     
   public function testCreateEventFillAllFnI() {
-  	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
-  	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
-  	$wireMock->reset();
-  	
   	$this->webDriver->get("$this->base_url/createEvent.php");
   	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
   
@@ -296,6 +266,37 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$organizerEmail = "john.doe@example.com";
     $website1 = "http://web1.example.com";
     $website2 = "http://web2.example.com";
+    
+    // FnI API stubs
+    
+		$this->stubAccessToken("fake-token");
+    $this->stubEventGenres();
+    $this->stubEventTypes();
+    $this->stubUsersFindEmpty($organizerEmail);
+    $this->stubUserCreate($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail));
+    $this->stubEventParticipantCreate($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
+    $this->stubEventCreate($this->createEventJson(123, 
+      false, 
+    	$name, 
+    	null, 
+    	$this->getISODate(2015, 1, 1), 
+    	"test_event", 
+    	"test_event@muc.example.com", 
+    	"OPEN", 
+    	null, 
+    	null, 
+    	$location, 
+    	null, 
+    	false, 
+    	null, 
+    	1, 
+    	null,
+    	null, 
+    	null,
+    	$startREST, 
+    	$endREST, 
+    	[])
+    );
     
     $this->findElement("#eventname")->sendKeys($name);
     $this->select("#eventtype", $type);
@@ -326,7 +327,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	// Verify API calls
     
     // Verify new event
-    $wireMock->verify(1, 
+    $this->wireMock->verify(1, 
       WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events'))
      		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
     		  false,
@@ -354,14 +355,14 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     );
     
     // Verify new user
-    $wireMock->verify(1, 
+    $this->wireMock->verify(1, 
       WireMock::postRequestedFor(WireMock::urlMatching('/fni/rest/users/users.*'))
      		-> withRequestBody(WireMock::equalToJson($this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail)))
     );
     
     // Verify organizer
     
-    $wireMock->verify(1, 
+    $this->wireMock->verify(1, 
       WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
      		-> withRequestBody(WireMock::equalToJson($this->createEventParticipantJson(null, 1234, "ORGANIZER", null)))
     );
@@ -384,8 +385,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	  ->format('c');
   }
   
-  protected function stubAccessToken($wireMock, $token) {
-  	$wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/oauth2/token'))
+  protected function stubAccessToken($token) {
+  	$this->wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/oauth2/token'))
   			->willReturn(WireMock::aResponse()
   					->withStatus(200)
   					->withHeader('Content-Type', 'application/json')
@@ -394,8 +395,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	);
   }
   
-  protected function stubEventTypes($wireMock) {
-  	$wireMock->stubFor(WireMock::get(WireMock::urlEqualTo('/fni/rest/illusion/types'))
+  protected function stubEventTypes() {
+  	$this->wireMock->stubFor(WireMock::get(WireMock::urlEqualTo('/fni/rest/illusion/types'))
   			->willReturn(WireMock::aResponse()
   					->withStatus(200)
   					->withHeader('Content-Type', 'application/json')
@@ -404,8 +405,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	);
   }
   
-  protected function stubEventGenres($wireMock) {
-  	$wireMock->stubFor(WireMock::get(WireMock::urlEqualTo('/fni/rest/illusion/types'))
+  protected function stubEventGenres() {
+  	$this->wireMock->stubFor(WireMock::get(WireMock::urlEqualTo('/fni/rest/illusion/types'))
   			->willReturn(WireMock::aResponse()
   					->withStatus(200)
   					->withHeader('Content-Type', 'application/json')
@@ -414,14 +415,45 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	);
   }
   
-  protected function stubUsersFindEmpty($wireMock, $email) {
+  protected function stubUsersFindEmpty($email) {
   	$encodedEmail = urlencode($email);
   	
-  	$wireMock->stubFor(WireMock::get(WireMock::urlEqualTo("/fni/rest/users/users?email=$encodedEmail"))
+  	$this->wireMock->stubFor(WireMock::get(WireMock::urlEqualTo("/fni/rest/users/users?email=$encodedEmail"))
   			->willReturn(WireMock::aResponse()
   					->withStatus(204)
   			)
   	);
+  }
+  
+	protected function stubEventCreate($body) {
+  	$this->wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/rest/illusion/events'))
+  			->willReturn(WireMock::aResponse()
+  					->withStatus(200)
+  					->withHeader('Content-Type', 'application/json')
+  					->withBody($body)
+  			)
+  	);
+  }
+  
+  protected function stubUserCreate($body) {
+  	$this->wireMock->stubFor(WireMock::post(WireMock::urlMatching('/fni/rest/users/users.*'))
+  			->willReturn(WireMock::aResponse()
+  					->withStatus(200)
+  					->withHeader('Content-Type', 'application/json')
+  					->withBody($body)
+  			)
+  	);
+  }
+  
+
+  protected function stubEventParticipantCreate($body) {
+	  $this->wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
+	  		->willReturn(WireMock::aResponse()
+	  				->withStatus(200)
+	  				->withHeader('Content-Type', 'application/json')
+	  				->withBody($body)
+	  		)
+	  );
   }
   
   protected function findElement($selector) {
