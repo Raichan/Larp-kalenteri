@@ -309,7 +309,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $status = 'ACTIVE';
         }
         
-        if ($illusionSync) {
+        if ($illusionSync == "true") {
         	$typeId = getIllusionClient()->getIllusionTypeId($eventtype);
         	$genreIds = getIllusionClient()->getIllusionGenreIds(explode(',',$genrestring));
         	
