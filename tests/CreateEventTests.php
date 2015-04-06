@@ -245,7 +245,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$this->webDriver->get("$this->base_url/createEvent.php");
   	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
   
-  	$name = "Test Event";
+  	$name = "Fill All Test Event";
   	$type = 3; // Conit ja miitit
   	$restType = 2;
   	$startUI = "01/01/2015";
@@ -328,32 +328,30 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	// Verify API calls
     
     // Verify new event
-    $this->wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events'))
-     		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
-    		  false,
-    		  $name,
-	    		$infoDesc,
-	    		null,
-	    		null,
-	    		null,
-	    		"OPEN",
-	    		null,
-	    		"EUR",
-	    		$location2,
-	    		$ageLimit,
-	    		true,
-	    		$icon,
-	    		$restType,
-	    		$signupStartREST,
-	    		$signupEndREST,
-	    		null,
-	    		$startREST,
-	    		$endREST,
-	    		[1,2,3,4,5,6,7,8,9,10,11,12,13,14])
-     		)
-     	)
-    );
+    
+  	$this->verifyRequest(1, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')), 
+  	  $this->createEventJson(null,
+  		  false,
+  			$name,
+  			$infoDesc,
+  			null,
+  			null,
+  			null,
+  			"OPEN",
+  			null,
+  			"EUR",
+  			$location2,
+  			$ageLimit,
+  			true,
+  			$icon,
+  			$restType,
+  			$signupStartREST,
+  			$signupEndREST,
+  			null,
+  			$startREST,
+  			$endREST,
+  			[1,2,3,4,5,6,7,8,9,10,11,12,13,14])
+  	);
     
     // Verify new user
     $this->wireMock->verify(1, 
@@ -371,6 +369,16 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
   	$this->deleteAllEvents();	
+  }
+  
+  protected function verifyRequest($count, $requestPattern, $body) {
+  	try {
+  		$this->wireMock->verify($count, $requestPattern -> withRequestBody(WireMock::equalToJson(body) ));
+  	} catch (VerificationException $e) {
+  		foreach ($this->wireMock->findAll($requestPattern) as $logged) {
+  			$this->fail("Request verification failed: Expected $body but received $logged->getBody()");
+  		}
+  	}
   }
   
   // TODO: testCreateEventAdmin()
