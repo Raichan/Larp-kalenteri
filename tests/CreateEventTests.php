@@ -281,6 +281,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$endUI = "02/01/2015";
   	$signupStartUI = "03/01/2015";
   	$signupEndUI =  "04/01/2015";
+  	$signupStartREST = $this->getISODate(2015, 1, 3);
+  	$signupEndREST = $this->getISODate(2015, 1, 4);
   	$location1 = 7; // Lappi
   	$location2 = "Testia";
   	$icon = "http://upload.wikimedia.org/wikipedia/commons/3/34/Boj_na_mBPA.jpg";
