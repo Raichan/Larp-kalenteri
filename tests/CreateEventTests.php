@@ -17,8 +17,6 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$travisJobNumber = getenv("TRAVIS_JOB_NUMBER");
   	
   	if (!empty($sauceUser) && !empty($sauceKey) && !empty($travisJobNumber)) {
-  		echo "Using Sauce Labs\n";
-   		echo 'Tunnel id: ' . $capabilities->getCapability("tunnel-identifier") . '\n';
   		// Travis / Sauce Labs
   		$capabilities = DesiredCapabilities::chrome();
    		$capabilities->setCapability("tunnel-identifier", $travisJobNumber);
