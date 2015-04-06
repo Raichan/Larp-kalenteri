@@ -133,7 +133,7 @@ if (isset($_SESSION["valid"])) {
             </span>
 			<br>
 			<span>
-                <input id="" name="eventfull" type="checkbox" value="1" <?php if ($eventfull == "t") echo( 'checked'); ?>/>
+                <input id="eventfull" name="eventfull" type="checkbox" value="1" <?php if ($eventfull == "t") echo( 'checked'); ?>/>
                 <label for="eventfull"><?php echo $label_eventfull; ?></label>
             </span>
 			<br>

@@ -65,13 +65,8 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$this->findElement("#infodesc")->sendKeys($description);
   	$this->findElement("#organizername")->sendKeys($organizerName);
   	$this->findElement("#organizeremail")->sendKeys($organizerEmail);	
-  	
-  	if ($this->capabilities->getBrowserName() == 'firefox') {
-  	  $this->findElement("#illusionsync")->click();
-  	} else {
-  		$this->findElement("#illusionsync")->sendKeys(WebDriverKeys::SPACE);
-  	}
-  	
+  	$this->toggleCheckboxes("#illusionsync");
+  	 
   	$this->findElement("#save")->click();
   
   	// Verify that event API call was not made
@@ -210,7 +205,66 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 
   	$this->deleteAllEvents();	
   }
-  // TODO: testCreateEventFillAll()
+    
+  public function testCreateEventFillAll() {
+  	$wireMock = WireMock::create("test.forgeandillusion.net", '8080');
+  	$this->assertEquals($wireMock->isAlive(), true, "WireMock is not alive");
+  	$wireMock->reset();
+  	
+  	$this->webDriver->get("$this->base_url/createEvent.php");
+  	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
+  
+  	$name = "Test Event";
+  	$type = 3; // Conit ja miitit
+  	$startUI = "01/01/2015";
+  	$endUI = "02/01/2015";
+  	$startREST = $this->getISODate(2015, 1, 1);
+  	$endREST = $this->getISODate(2015, 1, 2);
+  	$location1 = 7; // Lappi
+  	$location2 = "Testia";
+  	$icon = "http://upload.wikimedia.org/wikipedia/commons/3/34/Boj_na_mBPA.jpg";
+  	$cost = "22";
+  	$ageLimit = 16;
+  	$storyDesc = "Uneventful test where participants may only watch whats happening";
+  	$infoDesc = "Event for automatic testing";
+  	$organizerName = "John Doe";
+  	$organizerEmail = "john.doe@example.com";
+    $website1 = "http://web1.example.com";
+    $website2 = "http://web2.example.com";
+    
+    $this->findElement("#eventname")->sendKeys($name);
+    $this->select("#eventtype", $type);
+    $this->findElement("#datestart")->sendKeys($startUI);
+    $this->findElement("#dateend")->sendKeys($endUI);
+    $this->select("#location1", $location1);
+    $this->findElement("#location2")->sendKeys($location);
+    $this->findElement("#icon")->sendKeys($icon);
+    $this->toggleCheckboxes("input[name*=\"genre\"]");
+    $this->findElement("#cost")->sendKeys($cost);
+    $this->findElement("#agelimit")->sendKeys($ageLimit);
+    $this->toggleCheckboxes("#beginnerfriendly");
+    $this->toggleCheckboxes("#eventfull");
+    $this->toggleCheckboxes("#invitationonly");
+    $this->toggleCheckboxes("#languagefree");
+    $this->findElement("#storydesc")->sendKeys($storyDesc);
+    $this->findElement("#infodesc")->sendKeys($infoDesc);
+    $this->findElement("#organizername")->sendKeys($organizerName);
+    $this->findElement("#organizeremail")->sendKeys($organizerEmail);
+    $this->findElement("#website1")->sendKeys($website1);
+    $this->findElement("#website1")->sendKeys($website2);
+    $this->toggleCheckboxes("#illusionsync");
+    
+  	$this->findElement("#save")->click();
+  
+  	// Verify that event API call was not made
+  	
+  	$wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
+  	
+  	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+  	
+  	$this->deleteAllEvents();	
+  }
+  
   // TODO: testCreateEventFillAll()
   // TODO: testCreateEventAdmin()
   // TODO: testCreateEventAdminFnI()
@@ -267,6 +321,25 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   
   protected function findElement($selector) {
   	return $this->webDriver->findElement(WebDriverBy::cssSelector($selector));
+  }
+  
+  protected function findElements($selector) {
+  	return $this->webDriver->findElement(WebDriverBy::cssSelector($selector));
+  }
+  
+  protected function select($selector, $value) {
+  	$select = new WebDriverSelect($this->findElement($selector));
+  	$select->selectByValue($value);
+  }
+
+  protected function toggleCheckboxes($selector, $value) {
+  	foreach ($this->findElements($selector) as $element) {
+  		if ($this->capabilities->getBrowserName() == 'firefox') {
+  			$element->click();
+  		} else {
+  			$element->sendKeys(WebDriverKeys::SPACE);
+  		}
+  	}
   }
   
   private function createEventJson($id, $published, $name, $description, $created, $urlName, $xmppRoom, $joinMode,
