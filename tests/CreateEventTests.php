@@ -247,6 +247,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   
   	$name = "Test Event";
   	$type = 3; // Conit ja miitit
+  	$restType = 2;
   	$startUI = "01/01/2015";
   	$endUI = "02/01/2015";
   	$startREST = $this->getISODate(2015, 1, 1);
@@ -289,13 +290,13 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     	$ageLimit,
     	true, 
       $icon,
-      $type,
+      $restType,
       $signupStartREST,
       $signupEndREST,
      	null,
     	$startREST, 
     	$endREST, 
-    	[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
+    	[1,2,3,4,5,6,7,8,9,10,11,12,13,14])
     );
     
     $this->findElement("#eventname")->sendKeys($name);
@@ -343,13 +344,13 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 	    		$ageLimit,
 	    		true,
 	    		$icon,
-	    		$type,
+	    		$restType,
 	    		$signupStartREST,
 	    		$signupEndREST,
 	    		null,
 	    		$startREST,
 	    		$endREST,
-	    		[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
+	    		[1,2,3,4,5,6,7,8,9,10,11,12,13,14])
      		)
      	)
     );
