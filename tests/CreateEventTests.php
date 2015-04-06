@@ -327,7 +327,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
      		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
     		  false,
     		  $name,
-	    		$description,
+	    		$infoDesc,
 	    		null,
 	    		null,
 	    		null,
