@@ -334,7 +334,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
 	    		"OPEN",
 	    		null,
 	    		"EUR",
-	    		$location,
+	    		$location2,
 	    		$ageLimit,
 	    		true,
 	    		$icon,
