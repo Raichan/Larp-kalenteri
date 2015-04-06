@@ -237,7 +237,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     $this->findElement("#datestart")->sendKeys($startUI);
     $this->findElement("#dateend")->sendKeys($endUI);
     $this->select("#location1", $location1);
-    $this->findElement("#location2")->sendKeys($location);
+    $this->findElement("#location2")->sendKeys($location2);
     $this->findElement("#icon")->sendKeys($icon);
     $this->toggleCheckboxes("input[name*=\"genre\"]");
     $this->findElement("#cost")->sendKeys($cost);
@@ -332,7 +332,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	$select->selectByValue($value);
   }
 
-  protected function toggleCheckboxes($selector, $value) {
+  protected function toggleCheckboxes($selector) {
   	foreach ($this->findElements($selector) as $element) {
   		if ($this->capabilities->getBrowserName() == 'firefox') {
   			$element->click();
