@@ -387,6 +387,100 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	 
   	$this->deleteAllEvents();
   }
+
+  public function testCreateEventAdminFnI() {
+  	$this->loginAdmin();
+  	$this->webDriver->get("$this->base_url/createEvent.php");
+  	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
+  	
+  	$name = "Test Event";
+  	$description = "Event for automatic testing";
+  	$location = "Testia";
+  	$organizerName = "John Doe";
+  	$organizerEmail = "john.doe@example.com";
+  	$startUI = "01/01/2015";
+  	$endUI = "02/01/2015";
+  	$startREST = $this->getISODate(2015, 1, 1);
+  	$endREST = $this->getISODate(2015, 1, 2);
+  	
+  	// FnI API stubs
+  	
+  	$this->stubAccessToken("fake-token");
+  	$this->stubEventGenres();
+  	$this->stubEventTypes();
+  	$this->stubUsersFindEmpty($organizerEmail);
+  	$this->stubUserCreate($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail));
+  	$this->stubEventParticipantCreate($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
+  	$this->stubEventCreate($this->createEventJson(123,
+  			false,
+  			$name,
+  			null,
+  			$this->getISODate(2015, 1, 1),
+  			"test_event",
+  			"test_event@muc.example.com",
+  			"OPEN",
+  			null,
+  			null,
+  			$location,
+  			null,
+  			false,
+  			null,
+  			1,
+  			null,
+  			null,
+  			null,
+  			$startREST,
+  			$endREST,
+  			[])
+  	);
+  	 
+  	// Create event
+  	
+  	$this->findElement("#eventname")->sendKeys($name);
+  	$this->findElement("#datestart")->sendKeys($startUI);
+  	$this->findElement("#dateend")->sendKeys($endUI);
+  	$this->findElement("#location2")->sendKeys($location);
+  	$this->findElement("#infodesc")->sendKeys($description);
+  	$this->findElement("#organizername")->sendKeys($organizerName);
+  	$this->findElement("#organizeremail")->sendKeys($organizerEmail);
+  	$this->findElement("#save")->click();
+  	
+  	// Verify API calls
+  	
+  	// Verify new event
+  	$this->verifyPostRequest(1, '/fni/rest/illusion/events', $this->createEventJson(null,
+  			true,
+  			$name,
+  			$description,
+  			null,
+  			null,
+  			null,
+  			"OPEN",
+  			null,
+  			"EUR",
+  			$location,
+  			null,
+  			false,
+  			null,
+  			1,
+  			null,
+  			null,
+  			null,
+  			$startREST,
+  			$endREST,
+  			[])
+  	);
+  	
+  	// Verify new user
+  	$this->verifyPostRequest(1, '/fni/rest/users/users.*', $this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail));
+  	
+  	// Verify organizer
+  	$this->verifyPostRequest(1, '/fni/rest/illusion/events/123/participants', $this->createEventParticipantJson(null, 1234, "ORGANIZER", null));
+  	
+  	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+  	
+  	$this->deleteAllEvents();
+  }
   
   protected function loginAdmin() {
   	$username = "admin";
@@ -431,11 +525,6 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   		}
   	}
   }
-  
-  
-  // TODO: testCreateEventAdminFnI()
-  // TODO: testCreateEventFillAllAdmin()
-  // TODO: testCreateEventFillAllAdminFnI()
   
   private function getISODate($year, $month, $day) {
   	return (new DateTime())
