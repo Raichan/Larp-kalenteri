@@ -16,6 +16,7 @@ before_install:
 - sudo sed -i 's/^local\s\+all\s\+all\s\+peer/local all all md5/g' /etc/postgresql/9.3/main/pg_hba.conf
 - export PGPASSWORD=larpfi
 - psql -U larpfi larpfi -f ./tests/sql/tables.sql
+- psql -U larpfi larpfi -f ./tests/sql/admins.sql
 - sudo apt-add-repository -y ppa:ondrej/apache2
 - sudo apt-add-repository -y ppa:ondrej/php5
 - sudo apt-get update

@@ -44,7 +44,6 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   }
   
   public function testCreateEvent() {
-  	 
   	$this->webDriver->get("$this->base_url/createEvent.php");
   	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
   
@@ -139,45 +138,34 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     // Verify API calls
     
     // Verify new event
-    $this->wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events'))
-     		-> withRequestBody(WireMock::equalToJson($this->createEventJson(null,
-    		  false,
-    		  $name,
-	    		$description,
-	    		null,
-	    		null,
-	    		null,
-	    		"OPEN",
-	    		null,
-	    		"EUR",
-	    		$location,
-	    		null,
-	    		false,
-	    		null,
-	    		1,
-	    		null,
-	    		null,
-	    		null,
-	    		$startREST,
-	    		$endREST,
-	    		[])
-     		)
-     	)
+    $this->verifyPostRequest(1, '/fni/rest/illusion/events', $this->createEventJson(null,
+    	false,
+    	$name,
+	    $description,
+	    null,
+	    null,
+	    null,
+	    "OPEN",
+	    null,
+	    "EUR",
+	    $location,
+	    null,
+	    false,
+	    null,
+	    1,
+	    null,
+	    null,
+	    null,
+	    $startREST,
+	    $endREST,
+	    [])
     );
     
     // Verify new user
-    $this->wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlMatching('/fni/rest/users/users.*'))
-     		-> withRequestBody(WireMock::equalToJson($this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail)))
-    );
-    
+    $this->verifyPostRequest(1, '/fni/rest/users/users.*', $this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail));
+
     // Verify organizer
-    
-    $this->wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
-     		-> withRequestBody(WireMock::equalToJson($this->createEventParticipantJson(null, 1234, "ORGANIZER", null)))
-    );
+    $this->verifyPostRequest(1, '/fni/rest/illusion/events/123/participants', $this->createEventParticipantJson(null, 1234, "ORGANIZER", null));
     
     $this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
 
@@ -362,6 +350,74 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	
   	$this->deleteAllEvents();	
   }
+
+  public function testCreateEventAdmin() {
+  	$this->loginAdmin();
+  	$this->webDriver->get("$this->base_url/createEvent.php");
+  	$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
+  
+  	$name = "Test Event";
+  	$description = "Event for automatic testing";
+  	$location = "Testia";
+  	$organizerName = "John Doe";
+  	$organizerEmail = "john.doe@example.com";
+  	$startUI = "01/01/2015";
+  	$endUI = "02/01/2015";
+  	$startREST = $this->getISODate(2015, 1, 1);
+  	$endREST = $this->getISODate(2015, 1, 2);
+  
+  	// Create event
+  
+  	$this->findElement("#eventname")->sendKeys($name);
+  	$this->findElement("#datestart")->sendKeys($startUI);
+  	$this->findElement("#dateend")->sendKeys($endUI);
+  	$this->findElement("#location2")->sendKeys($location);
+  	$this->findElement("#infodesc")->sendKeys($description);
+  	$this->findElement("#organizername")->sendKeys($organizerName);
+  	$this->findElement("#organizeremail")->sendKeys($organizerEmail);
+  	$this->toggleCheckboxes("#illusionsync");
+  
+  	$this->findElement("#save")->click();
+  
+  	// Verify that event API call was not made
+  	 
+  	$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
+  	 
+  	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+  	 
+  	$this->deleteAllEvents();
+  }
+  
+  protected function loginAdmin() {
+  	$username = "admin";
+  	$password = "password";
+  	
+  	$this->webDriver->get("$this->base_url");
+  	$this->findElement(".dropdown-toggle")->click();
+  	$this->waitAndClickElement("a[href=\"login.php\"]");
+  	
+  	$this->findElement("#exampleInputEmail1")->sendKeys($username);
+  	$this->findElement("#exampleInputPassword1")->sendKeys($password);
+  	$this->findElement("button")->click();
+  	
+  	$this->assertEquals("Admin User", $this->findElement(".dropdown a")->getText());
+  }
+  
+  protected function waitAndClickElement($selector) {
+  	$this->waitElementVisible($selector);
+  	$this->findElement($selector)->click();
+  }
+  
+  protected function waitElementVisible($selector) {
+  	$this->webDriver->wait()->until(function ($webDriver) use ($selector) {
+  		$elements = $webDriver->findElements(WebDriverBy::cssSelector($selector));
+  		if (count($elements) > 0) {
+  			return $elements[0]->isDisplayed();
+  		}
+  		
+  		return false;
+  	});
+  }
   
   protected function verifyPostRequest($count, $url, $body) {
   	try {
@@ -376,7 +432,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	}
   }
   
-  // TODO: testCreateEventAdmin()
+  
   // TODO: testCreateEventAdminFnI()
   // TODO: testCreateEventFillAllAdmin()
   // TODO: testCreateEventFillAllAdminFnI()
