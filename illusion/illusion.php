@@ -98,9 +98,9 @@
   		foreach ($this->getGenreNames($genres) as $genreName) {
   			$genreId = $genreIdMap[$genreName];
   			if (!$genreId) {
-  				var_dump($genreName);
-  				die;
+  				throw new Exception("genreId for '$genreName' could not be found.");
   			}
+  			
   			$result[] = $genreId;
   		}
   		
