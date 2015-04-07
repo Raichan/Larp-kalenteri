@@ -318,6 +318,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         	// TODO: $website1, $website2, $status, $eventfull, 
         	// TODO: $languagefree
         	// TODO: email for organizer...
+        	// TODO: Age ranges
         	
         	$illusionEvent = getIllusionClient()->createEvent(
         			$ADMIN == true, 
@@ -328,7 +329,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         			null, 
         			'EUR', 
         			$location2, 
-        			$agelimit, 
+        			empty($agelimit) && is_numeric($agelimit) ? null : intval($agelimit), 
         			$beginnerfriendly != "false", 
         			$icon, 
         			$typeId, 
