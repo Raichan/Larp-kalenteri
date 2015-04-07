@@ -35,12 +35,12 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	}
   	
   	$this->wireMock = WireMock::create("test.forgeandillusion.net", '8080');
+  	$this->wireMock->reset();
   	$this->assertEquals($this->wireMock->isAlive(), true, "WireMock is not alive");
   }
   
   public function tearDown() {
    	$this->webDriver->quit();
-  	$this->wireMock->reset();
   }
   
   public function testCreateEvent() {
@@ -321,7 +321,6 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     $this->findElement("#organizeremail")->sendKeys($organizerEmail);
     $this->findElement("#website1")->sendKeys($website1);
     $this->findElement("#website2")->sendKeys($website2);
-    $this->toggleCheckboxes("#illusionsync");
     
   	$this->findElement("#save")->click();
 
@@ -329,7 +328,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
     
     // Verify new event
     
-  	$this->verifyRequest(1, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')), 
+  	$this->verifyPostRequest(1, '/fni/rest/illusion/events', 
   	  $this->createEventJson(null,
   		  false,
   			$name,
@@ -337,7 +336,7 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   			null,
   			null,
   			null,
-  			"OPEN",
+  			"INVITE_ONLY",
   			null,
   			"EUR",
   			$location2,
@@ -354,29 +353,25 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   	);
     
     // Verify new user
-    $this->wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlMatching('/fni/rest/users/users.*'))
-     		-> withRequestBody(WireMock::equalToJson($this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail)))
-    );
+  	$this->verifyPostRequest(1, '/fni/rest/users/users.*', $this->createUserJson(null, "John", "Doe", null, "fi", $organizerEmail));
     
     // Verify organizer
+  	$this->verifyPostRequest(1, '/fni/rest/illusion/events/123/participants', $this->createEventParticipantJson(null, 1234, "ORGANIZER", null));
     
-    $this->wireMock->verify(1, 
-      WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
-     		-> withRequestBody(WireMock::equalToJson($this->createEventParticipantJson(null, 1234, "ORGANIZER", null)))
-    );
-  	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
   	$this->deleteAllEvents();	
   }
   
-  protected function verifyRequest($count, $requestPattern, $body) {
+  protected function verifyPostRequest($count, $url, $body) {
   	try {
-  		$this->wireMock->verify($count, $requestPattern -> withRequestBody(WireMock::equalToJson($body) ));
-  	} catch (VerificationException $e) {
-  		foreach ($this->wireMock->findAll($requestPattern) as $logged) {
-  			$this->fail("Request verification failed: Expected $body but received $logged->getBody()");
+  		$this->wireMock->verify($count, WireMock::postRequestedFor(WireMock::urlMatching($url))->withRequestBody(WireMock::equalToJson($body)));
+  	} catch (Exception $e) {
+  		$loggedRequests = $this->wireMock->findAll(WireMock::postRequestedFor(WireMock::urlMatching($url)));
+   		$this->assertEquals("post call count into $url does not match", $count, count($loggedRequests));
+		  foreach ($loggedRequests as $logged) {
+		  	$requestBody = $logged->getBody();
+		  	$this->assertEquals($body, $requestBody, "requrest body did not match expected body");
   		}
   	}
   }
@@ -415,11 +410,11 @@ class CreateEventTests extends PHPUnit_Framework_TestCase {
   }
   
   protected function stubEventGenres() {
-  	$this->wireMock->stubFor(WireMock::get(WireMock::urlEqualTo('/fni/rest/illusion/types'))
+  	$this->wireMock->stubFor(WireMock::get(WireMock::urlEqualTo('/fni/rest/illusion/genres'))
   			->willReturn(WireMock::aResponse()
   					->withStatus(200)
   					->withHeader('Content-Type', 'application/json')
-  					->withBody('[{"id":1,"name":"Fantasia"},{"id":2,"name":"Sci-fi"},{"id":3,"name":"Cyberpunk"},{"id":4,"name":"Steampunk"},{"id":5,"name":"Post-apokalyptinen"},{"id":6,"name":"Historiallinen"},{"id":7,"name":"JÃ¤nnitys"},{"id":8,"name":"Kauhu"},{"id":9,"name":"Realismi"},{"id":10,"name":"Kaupunkipeli"},{"id":11,"name":"Uuskumma"},{"id":12,"name":"Toiminta"},{"id":13,"name":"Draama"},{"id":14,"name":"Huumori"}]')
+  					->withBody('[{"id":1,"name":"Fantasia"},{"id":2,"name":"Sci-fi"},{"id":3,"name":"Cyberpunk"},{"id":4,"name":"Steampunk"},{"id":5,"name":"Post-apokalyptinen"},{"id":6,"name":"Historiallinen"},{"id":7,"name":"Jännitys"},{"id":8,"name":"Kauhu"},{"id":9,"name":"Realismi"},{"id":10,"name":"Kaupunkipeli"},{"id":11,"name":"Uuskumma"},{"id":12,"name":"Toiminta"},{"id":13,"name":"Draama"},{"id":14,"name":"Huumori"}]')
   			)
   	);
   }
