@@ -313,7 +313,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         	$typeId = getIllusionClient()->getIllusionTypeId($eventtype);
         	$genreIds = getIllusionClient()->getIllusionGenreIds(explode(',',$genrestring));
         	
-        	// TODO: costs
         	// TODO: $storydesc, 
         	// TODO: $website1, $website2, $status, $eventfull, 
         	// TODO: $languagefree
@@ -326,7 +325,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         			$infodesc, 
         			null, 
         			$invitationonly == "false" ? 'OPEN' : 'INVITE_ONLY',
-        			null, 
+        			empty($cost) ? null : $cost, 
+        			null,
         			'EUR', 
         			$location2, 
         			empty($agelimit) && is_numeric($agelimit) ? null : intval($agelimit), 

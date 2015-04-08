@@ -15,7 +15,7 @@
   		$this->client_secret = $client_secret;
   	}
   	
-  	public function createEvent($published, $name, $description, $urlName, $joinMode, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $start, $end, $genreIds) {
+  	public function createEvent($published, $name, $description, $urlName, $joinMode, $signUpFeeText, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $start, $end, $genreIds) {
   		$event = array(
   			'id' => null,
   			'published' => $published,
@@ -25,6 +25,7 @@
   			'urlName' => $urlName,
   			'xmppRoom' => null,
   			'joinMode' => $joinMode,
+  			'signUpFeeText' => $signUpFeeText,
   			'signUpFee' => $signUpFee,
   			'signUpFeeCurrency' => $signUpFeeCurrency,
   			'location' => $location,
@@ -51,7 +52,7 @@
   		return null;
   	}
   	
-  	public function updateEvent($id, $published, $name, $description, $urlName, $joinMode, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $startDate, $endDate, $genreIds) {
+  	public function updateEvent($id, $published, $name, $description, $urlName, $joinMode, $signUpFeeText, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $startDate, $endDate, $genreIds) {
   		$event = array(
   		  "id" => $id,
   			"published" => $published,
@@ -59,6 +60,7 @@
   			"description" => $description,
   			"urlName" => $urlName,
   			"joinMode" => $joinMode,
+  		  'signUpFeeText' => $signUpFeeText,
   			"signUpFee" => $signUpFee,
   			"signUpFeeCurrency" => $signUpFeeCurrency,
   		  "location" => $location,
