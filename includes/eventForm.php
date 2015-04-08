@@ -21,33 +21,39 @@ if (isset($_SESSION["valid"])) {
         }
     });
 
+    function disableFnISync(reason) {
+      $("#illusionsync").parent().find('span.illusion-error').remove()
+    
+      var dateRequiredText = $("#illusionsync").attr('data-' + reason);
+      $("#illusionsync")
+        .attr({
+          'title': dateRequiredText,
+          'disabled': 'disabled'
+        })
+        .parent()
+        .append($('<span>').addClass('illusion-error').text(dateRequiredText));
+    }
+
+    function enableFnISync() {
+      $("#illusionsync")
+        .removeAttr('title')
+        .removeAttr('disabled')
+        .parent().find('span.illusion-error').remove();
+    }
+
     function dateButtons() {
         if (document.getElementById("date_datepicker").checked) {
             document.getElementById("datestart").disabled = false;
             document.getElementById("dateend").disabled = false;
             document.getElementById("datetext").disabled = true;
-
-            $("#illusionsync")
-              .removeAttr('title')
-              .removeAttr('disabled');
-
-            $("#illusionsync").parent().find('span.illusion-error').remove();
+            enableFnISync();
         }
 
         else if (document.getElementById("date_text").checked) {
             document.getElementById("datestart").disabled = true;
             document.getElementById("dateend").disabled = true;
             document.getElementById("datetext").disabled = false;
-            
-            var dateRequiredText = $("#illusionsync").attr('data-date-required');
-            $("#illusionsync")
-              .attr({
-                'title': dateRequiredText,
-                'disabled': 'disabled'
-              });
-            $("#illusionsync")
-              .parent()
-              .append($('<span>').addClass('illusion-error').text(dateRequiredText));
+            disableFnISync('date-required');
         }
 
 
@@ -58,6 +64,10 @@ if (isset($_SESSION["valid"])) {
         document.getElementById(button).checked = true;
         dateButtons();
     }
+
+    $(document).ready(function () {
+      disableFnISync('date-required');
+    });
 </script>
 
 <div id="form_container">
