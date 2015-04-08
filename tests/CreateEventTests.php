@@ -472,5 +472,36 @@ class CreateEventTests extends IntegrationTests {
   	
   	$this->deleteAllEvents();
   }
+
+	public function testCreateEventDateRequiredFnI() {
+		$this->webDriver->get("$this->base_url/createEvent.php");
+		$this->assertContains('LARP.fi Tapahtumakalenteri', $this->webDriver->getTitle());
+	
+		$name = "Test Event";
+		$description = "Event for automatic testing";
+		$location = "Testia";
+		$organizerName = "John Doe";
+		$organizerEmail = "john.doe@example.com";
+		$dateText = "sometime next year";
+		
+		// Create event
+	
+		$this->findElement("#eventname")->sendKeys($name);
+		$this->findElement("#datetext")->sendKeys($dateText);
+		$this->findElement("#location2")->sendKeys($location);
+		$this->findElement("#infodesc")->sendKeys($description);
+		$this->findElement("#organizername")->sendKeys($organizerName);
+		$this->findElement("#organizeremail")->sendKeys($organizerEmail);
+		$this->assertFalse($this->findElement("#illusionsync")->isEnabled());
+		$this->findElement("#save")->click();
+	
+		// Verify that event API call was not made
+		 
+		$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
+		 
+		$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+		 
+		$this->deleteAllEvents();
+	}
 }
 ?>
