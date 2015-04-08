@@ -118,6 +118,7 @@ $label_link1 = "Verkkosivu 1";
 $label_link2 = "Verkkosivu 2";
 $label_illusion = "Luo Illusion-tapahtuma";
 $text_illusion = "Tapahtuma ilmoitetaan myös Forge & Illusionin tapahtumakalenteriin (<a href=\"http://www.forgeandillusion.net/illusion/\">www.forgeandillusion.net/illusion</a>)";
+$daterequired_illusion = "Illusion tapahtumilla täytyy olla päivämäärä. Voit luoda Illusion-tapahtuman myöhemmin muokkamalla tapahtumaa";
 $button_submit = "Lähetä";
 
 // includes/eventInfo.php

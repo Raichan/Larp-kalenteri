@@ -118,6 +118,7 @@ $label_link1 = "Web site 1";
 $label_link2 = "Web site 2";
 $label_illusion = "Create Illusion event";
 $text_illusion = "Event will be created also into the Forge &amp; Illusionin event calendar (<a href=\"http://www.forgeandillusion.net/illusion/\">www.forgeandillusion.net/illusion</a>)";
+$daterequired_illusion = "Illusion events require dates. You can create the event afterwards by modifying the event";
 $button_submit = "Submit";
 
 // includes/eventInfo.php

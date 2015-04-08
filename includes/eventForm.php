@@ -26,13 +26,32 @@ if (isset($_SESSION["valid"])) {
             document.getElementById("datestart").disabled = false;
             document.getElementById("dateend").disabled = false;
             document.getElementById("datetext").disabled = true;
+
+            $("#illusionsync")
+              .removeAttr('title')
+              .removeAttr('disabled');
+
+            $("#illusionsync").parent().find('span.illusion-error').remove();
         }
 
         else if (document.getElementById("date_text").checked) {
             document.getElementById("datestart").disabled = true;
             document.getElementById("dateend").disabled = true;
             document.getElementById("datetext").disabled = false;
+            
+            var dateRequiredText = $("#illusionsync").attr('data-date-required');
+            $("#illusionsync")
+              .attr({
+                'title': dateRequiredText,
+                'disabled': 'disabled'
+              });
+            $("#illusionsync")
+              .parent()
+              .append($('<span>').addClass('illusion-error').text(dateRequiredText));
         }
+
+
+        
     }
 
     function checkRadioButton(button) {
@@ -163,7 +182,7 @@ if (isset($_SESSION["valid"])) {
         
         <p>
           <span>
-            <input id="illusionsync" name="illusionsync" type="checkbox" value="1" checked="checked"/>
+            <input id="illusionsync" name="illusionsync" type="checkbox" value="1" checked="checked" data-date-required="<?php echo $daterequired_illusion ?>"/>
             <label for="illusionsync"><?php echo $label_illusion; ?></label>
           </span>
           <p>

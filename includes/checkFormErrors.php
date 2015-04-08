@@ -314,7 +314,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         	$genreIds = getIllusionClient()->getIllusionGenreIds(explode(',',$genrestring));
         	
         	// TODO: costs
-        	// TODO: $datetext, $storydesc, 
+        	// TODO: $storydesc, 
         	// TODO: $website1, $website2, $status, $eventfull, 
         	// TODO: $languagefree
         	// TODO: email for organizer...
