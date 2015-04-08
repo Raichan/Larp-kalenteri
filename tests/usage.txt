@@ -1,0 +1,7 @@
+Running tests locally:
+
+1) Download Selenium Server JAR (http://selenium-release.storage.googleapis.com/2.45/selenium-server-standalone-2.45.0.jar)
+2) Download WireMock server (http://repo1.maven.org/maven2/com/github/tomakehurst/wiremock/1.54/wiremock-1.54-standalone.jar)
+3) Start Selenium server (java -jar selenium-server-standalone-2.45.0.jar)
+4) Start WireMock server (java -jar wiremock-1.54-standalone.jar --https-port 8443 --port 8080 --bind-address test.forgeandillusion.net --https-keystore ./test.forgeandillusion.net.keystore)
+5) Run tests (vendor/bin/phpunit)
