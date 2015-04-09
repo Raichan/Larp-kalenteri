@@ -3,7 +3,7 @@
   require __DIR__ . '/../vendor/autoload.php';
   require_once __DIR__ . '/config.php';
   
-  class IllusionEventController {
+  class FnIClient {
   	
   	private $base_url;
   	private $client_id;
@@ -22,20 +22,20 @@
   			'name' => $name,
   			'description' => $description,
   			'created' => null,
-  			'urlName' => $urlName,
+  			"urlName" => empty($urlName) ? null : $urlName,
   			'xmppRoom' => null,
   			'joinMode' => $joinMode,
-  			'signUpFeeText' => $signUpFeeText,
-  			'signUpFee' => $signUpFee,
-  			'signUpFeeCurrency' => $signUpFeeCurrency,
-  			'location' => $location,
-  			'ageLimit' => empty($ageLimit) ? null : $ageLimit,
+  			'signUpFeeText' => empty($signUpFeeText) ? null : $signUpFeeText,
+  			"signUpFee" => empty($signUpFee) ? null : $signUpFee,
+  			"signUpFeeCurrency" => empty($signUpFeeCurrency) ? null : $signUpFeeCurrency,
+  			"location" => empty($location) ? null : $location,
+  			"ageLimit" => empty($ageLimit) ? null : intval($ageLimit),
   			'beginnerFriendly' => $beginnerFriendly,
-  			'imageUrl' => empty($imageUrl) ? null : $imageUrl,
+  			"imageUrl" => empty($imageUrl) ? null : $imageUrl,
   			'typeId' => $typeId,
   			'signUpStartDate' => $signUpStartDate ? $signUpStartDate->format('c') : null,
   			'signUpEndDate' => $signUpEndDate ? $signUpEndDate->format('c') : null,
-  			'domain' => $domain,
+  			"domain" => empty($domain) ? null : $domain,
   			'start' => $start->format('c'),
   			'end' => $end->format('c'),
   			'genreIds' => $genreIds
@@ -58,19 +58,19 @@
   			"published" => $published,
   			"name" => $name,
   			"description" => $description,
-  			"urlName" => $urlName,
+  			"urlName" => empty($urlName) ? null : $urlName,
   			"joinMode" => $joinMode,
-  		  'signUpFeeText' => $signUpFeeText,
-  			"signUpFee" => $signUpFee,
-  			"signUpFeeCurrency" => $signUpFeeCurrency,
-  		  "location" => $location,
-  			"ageLimit" => $ageLimit,
+  		  'signUpFeeText' => empty($signUpFeeText) ? null : $signUpFeeText,
+  			"signUpFee" => empty($signUpFee) ? null : $signUpFee,
+  			"signUpFeeCurrency" => empty($signUpFeeCurrency) ? null : $signUpFeeCurrency,
+  		  "location" => empty($location) ? null : $location,
+  			"ageLimit" => empty($ageLimit) ? null : intval($ageLimit),
   			"beginnerFriendly" => $beginnerFriendly,
-  			"imageUrl" => $imageUrl,
+  			"imageUrl" => empty($imageUrl) ? null : $imageUrl,
   			"typeId" => $typeId,
-  			"signUpStartDate" => $signUpStartDate->format('c'),
-  			"signUpEndDate" => $signUpEndDate->format('c'),
-  			"domain" => $domain,
+  			"signUpStartDate" => $signUpStartDate != null ? $signUpStartDate->format('c') : null,
+  			"signUpEndDate" => $signUpEndDate != null ? $signUpEndDate->format('c') : null,
+  			"domain" => empty($domain) ? null : $domain,
   			"start" => $startDate->format('c'),
   			"end" => $endDate->format('c'),
   			"genreIds" => $genreIds
@@ -301,9 +301,103 @@
   	
   }
   
-  function getIllusionClient() {
-  	return new IllusionEventController(FNI_BASE_URL, FNI_CLIENT_ID, FNI_CLIENT_SECRET);
+  class IllusionController {
+  	 
+  	private $client;
+  	 
+  	public function __construct() {
+  		$this->client = new FnIClient(FNI_BASE_URL, FNI_CLIENT_ID, FNI_CLIENT_SECRET);
+  	}
+  	
+  	public function createEvent($eventData) {
+  		$typeId = $this->client->getIllusionTypeId($eventData['type']);
+  		$genreIds = $this->client->getIllusionGenreIds($eventData['genres']);
+  		
+  		$illusionEvent = $this->client->createEvent(
+  		  $eventData['status'] == 'ACTIVE',
+  			$eventData['name'],
+  			$eventData['infoDescription'],
+  			null,
+  			$eventData['invitationOnly'] ? 'INVITE_ONLY' : 'OPEN',
+  			$eventData['cost'],
+  			null,
+  			'EUR',
+  			$eventData['location'],
+  			$eventData['ageLimit'],
+  			$eventData['beginnerFriendly'],
+  			$eventData['iconURL'],
+  			$typeId,
+  			$eventData['signUpStart'],
+  			$eventData['signUpEnd'],
+  			null,
+  			$eventData['start'],
+  			$eventData['end'],
+  			$genreIds
+  	  );
+
+  		$illusionEventId = $illusionEvent['id'];
+  		$user = $this->client->findUserByEmail($eventData['organizerEmail']);
+  		if (!$user) {
+  			// user does not yet exist on the Forge & Illusion so we create new with given password
+  		
+  			$firstName = $lastName = null;
+  			if ($eventData['organizerName']) {
+  				$nameArray = explode(' ', $eventData['organizerName'], 2);
+  				if (count($nameArray) == 2) {
+  					$firstName = $nameArray[0];
+  					$lastName = $nameArray[1];
+  				} else {
+  					$firstName = $nameArray[0];
+  				}
+  			}
+  		
+  			$locale = "fi";
+  			if (isset($_COOKIE["language"])){
+  				$locale = $_COOKIE["language"];
+  			}
+  		
+  			$user = $this->client->createUser($eventData['organizerEmail'], $firstName, $lastName, $locale, $eventData['password']);
+  		}
+  		 
+  		$participant = $this->client->createEventParticipant($illusionEventId, $user['id'], "ORGANIZER");
+  		
+  		return $event;
+  	}
+  	
+  	public function updateEvent($eventData) {
+  		if ($eventData['illusionId']) {
+  			$typeId = $this->client->getIllusionTypeId($eventData['type']);
+  			$genreIds = $this->client->getIllusionGenreIds($eventData['genres']);
+  	
+  			return $this->client->updateEvent($eventData['illusionId'],
+  					$eventData['status'] == 'ACTIVE',
+  					$eventData['name'],
+  					$eventData['infoDescription'],
+  					null,
+  					$eventData['invitationOnly'] ? 'INVITE_ONLY' : 'OPEN',
+  					$eventData['cost'],
+  					null,
+  					'EUR',
+  					$eventData['location'],
+  					$eventData['ageLimit'],
+  					$eventData['beginnerFriendly'],
+  					$eventData['iconURL'],
+  					$typeId,
+  					$eventData['signUpStart'],
+  					$eventData['signUpEnd'],
+  					null,
+  					$eventData['start'],
+  					$eventData['end'],
+  					$genreIds
+  			);
+  		}
+  		
+  		return null;
+  	}
   }
-  
+
+  function getIllusionController() {
+  	return new IllusionController();
+  }
 
 ?>

@@ -140,6 +140,35 @@ function getListOfEvents($month, $day, $year) {
     }
 }
 
+function getEventIdByPassword($password) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$result = dbQueryP('select id from events where password = $1', [$password]);
+	
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+  	return intval($row['id']);
+	}
+	
+	return null;
+}
+
+function updateEventIllusionId($eventId, $illusionEventId) {
+	require_once (__DIR__ . '/connectDB.php');
+	dbQueryP("update events set illusionId = $1 where id = $2", array($illusionEventId, $eventId));
+}
+
+function strToDate($str) {
+	if (empty($str)) {
+		return null;
+	}
+
+	return (new DateTime())
+	->setTimezone(new DateTimeZone("UTC"))
+	->setTimestamp(intval($str))
+	->setTime(0, 0, 0);
+}
+
 function getEventData($id) {
 	require_once (__DIR__ . '/connectDB.php');
 	
@@ -161,11 +190,11 @@ function getEventData($id) {
 		  'id' => intval($row['id']),
 			'name' => $row['eventname'],
 			'type' => intval($row['eventtype']),
-			'start' => (new DateTime())->setTimestamp(intval($row['startdate'])),
-			'end' => (new DateTime())->setTimestamp(intval($row['enddate'])),
+			'start' => strToDate($row['startdate']),
+			'end' => strToDate($row['enddate']),
 			'textDate' => $row['datetextfield'],			
-			'signUpStart' => (new DateTime())->setTimestamp(intval($row['startsignuptime'])),
-			'signUpEnd' => (new DateTime())->setTimestamp(intval($row['endsignuptime'])),
+			'signUpStart' => strToDate($row['startsignuptime']),
+			'signUpEnd' => strToDate($row['endsignuptime']),
 			'location' => $row['locationtextfield'],
 			'iconURL' => $row['iconurl'],
 			'genres' => $row['genre'] ? explode(",", $row['genre']) : [],

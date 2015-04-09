@@ -35,17 +35,6 @@ function dateToTimestampstring($date) {
     return strval($timestamp);
 }
 
-function strToDate($str) {
-	if (empty($str)) {
-		return null;
-	}
-	
-	return (new DateTime())
-	  ->setTimezone(new DateTimeZone("UTC"))
-	  ->setTimestamp(intval($str))
-	  ->setTime(0, 0, 0);
-}
-
 // DELETE THIS AFTERWARDS
 function debug_to_console($data) {
 
@@ -313,62 +302,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $status = 'ACTIVE';
         }
         
-        if (($illusionSync == "true") && ($illusionEventId == null)) {
-        	$typeId = getIllusionClient()->getIllusionTypeId($eventtype);
-        	$genreIds = getIllusionClient()->getIllusionGenreIds(explode(',',$genrestring));
+        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "')";
+        $result = dbQuery($query);
         	
-        	$illusionEvent = getIllusionClient()->createEvent(
-        			$status == 'ACTIVE', 
-        			$eventname, 
-        			$infodesc, 
-        			null, 
-        			$invitationonly == "false" ? 'OPEN' : 'INVITE_ONLY',
-        			empty($cost) ? null : $cost, 
-        			null,
-        			'EUR', 
-        			$location2, 
-        			empty($agelimit) && is_numeric($agelimit) ? null : intval($agelimit), 
-        			$beginnerfriendly != "false", 
-        			$icon, 
-        			$typeId, 
-        			strToDate($signupstart), 
-        			strToDate($signupend), 
-        			null, 
-        			strToDate($datestart), 
-        			strToDate($dateend), 
-        			$genreIds
-        	);
-        	
-        	$illusionEventId = $illusionEvent['id'];
-        	$user = getIllusionClient()->findUserByEmail($organizeremail);
-        	if (!$user) {
-        		// user does not yet exist on the Forge & Illusion so we create new with given password
-        		
-        		$firstName = $lastName = null;
-        		if ($organizername) {
-        			$nameArray = explode(' ', $organizername, 2);
-        			if (count($nameArray) == 2) {
-        				$firstName = $nameArray[0];
-        				$lastName = $nameArray[1];
-        			} else {
-        				$firstName = $nameArray[0];
-        			}
-        		}
-        		
-        		$locale = $_COOKIE["language"];
-        		if (!$locale) {
-        			$locale = "fi";
-        		}
-        		
-        		$user = getIllusionClient()->createUser($organizeremail, $firstName, $lastName, $locale, $password);
-        	}
-        	
-        	$participant = getIllusionClient()->createEventParticipant($illusionEventId, $user['id'], "ORGANIZER");
+				if (($illusionSync == "true") && ($illusionEventId == null)) {
+					$eventId = getEventIdByPassword($password);
+					if ($eventId == null) {
+						throw new Exception("Could not find eventId for new event");
+	   			}
+					
+					$eventData = getEventData($eventId);
+					if ($eventData == null) {
+						throw new Exception("Could not find event data for event $eventId");
+					}
+					
+        	$illusionEvent = getIllusionController()->createEvent($eventData);
+        	updateEventIllusionId($eventId, $illusionEvent['id']);
         }
         
-        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree, illusionId) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "',$1)";
-        $result = dbQueryP($query, [ $illusionEventId ]);
-
         if ($result) {
             // Sending all admins an email notification
             include(__DIR__ . "/emails.php");

@@ -32,34 +32,7 @@ if ($event != null) {
     if ($action == "a") {
     	sendEmail($event->getOrganizerEmail(), "approved", $comment, $event->getEventName(), $event->getEventPassword());
       $ret = approveEvent($eventId);
-      $eventData = getEventData($eventId);
-      if ($eventData->illusionId) {
-      	$typeId = getIllusionClient()->getIllusionTypeId($eventData->type);
-      	$genreIds = getIllusionClient()->getIllusionGenreIds($eventData->genres);
-      	 
-      	$illusionEvent = getIllusionClient()->updateEvent($eventData->illusionId,
-      			true,
-      			$eventData->name,
-      			$eventData->infoDescription,
-      			null,
-      			$eventData->invitationOnly ? 'INVITE_ONLY' : 'OPEN',
-      			$eventData->cost,
-      			null,
-      			'EUR',
-      			$eventData->location,
-      			$eventData->ageLimit,
-      			$eventData->beginnerFriendly,
-      			$eventData->iconURL,
-      			$typeId,
-      			$eventData->signUpStart,
-      			$eventData->signUpEnd,
-      			null,
-      			$eventData->start,
-      			$eventData->end,
-      			$genreIds
-      	);
-      }
-      
+      getIllusionController().updateEvent(getEventData($eventId));
       header("Location: eventsApproval.php?error=0");
     } else if ($action == "d") {
         sendEmail($event->getOrganizerEmail(), "denied", $comment, $event->getEventName(), $event->getEventPassword());
