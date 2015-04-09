@@ -30,41 +30,36 @@ if (isset($_POST["comment"])) {
 $event = getCeventObject($eventId);
 if ($event != null) {
     if ($action == "a") {
-		  $eventData = getEventData($eventId);
     	sendEmail($event->getOrganizerEmail(), "approved", $comment, $event->getEventName(), $event->getEventPassword());
-    	
-			if ($eventData->illusionId) {
-        $typeId = getIllusionClient()->getIllusionTypeId($eventData->type);
-        $genreIds = getIllusionClient()->getIllusionGenreIds($eventData->genres);
-        	
-        // TODO: cost
-        // TODO: $datetext, $storydesc, $organizername
-        // TODO: $organizeremail, $website1, $website2, $status, $password, $eventfull, $invitationonly
-        // TODO: $languagefree
-        
-        $illusionEvent = getIllusionClient()->updateEvent($event->getIllusionId(),
-          true,
-        	$eventData->name,
-        	$eventData->infoDescription,
-        	null,
-        	$eventData->invitationOnly ? 'INVITE_ONLY' : 'OPEN',
-        	null,
-        	'EUR',
-        	$eventData->location,
-        	$eventData->ageLimit,
-        	$eventData->beginnerFriendly,
-        	$eventData->iconURL,
-        	$typeId,
-        	$eventData->signUpStart,
-        	$eventData->signUpEnd,
-        	null,
-        	$eventData->start,
-        	$eventData->end,
-        	$genreIds
-        );
+      $ret = approveEvent($eventId);
+      $eventData = getEventData($eventId);
+      if ($eventData->illusionId) {
+      	$typeId = getIllusionClient()->getIllusionTypeId($eventData->type);
+      	$genreIds = getIllusionClient()->getIllusionGenreIds($eventData->genres);
+      	 
+      	$illusionEvent = getIllusionClient()->updateEvent($eventData->illusionId,
+      			true,
+      			$eventData->name,
+      			$eventData->infoDescription,
+      			null,
+      			$eventData->invitationOnly ? 'INVITE_ONLY' : 'OPEN',
+      			$eventData->cost,
+      			null,
+      			'EUR',
+      			$eventData->location,
+      			$eventData->ageLimit,
+      			$eventData->beginnerFriendly,
+      			$eventData->iconURL,
+      			$typeId,
+      			$eventData->signUpStart,
+      			$eventData->signUpEnd,
+      			null,
+      			$eventData->start,
+      			$eventData->end,
+      			$genreIds
+      	);
       }
       
-      $ret = approveEvent($eventId);
       header("Location: eventsApproval.php?error=0");
     } else if ($action == "d") {
         sendEmail($event->getOrganizerEmail(), "denied", $comment, $event->getEventName(), $event->getEventPassword());
