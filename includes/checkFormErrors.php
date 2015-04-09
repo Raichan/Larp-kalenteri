@@ -313,12 +313,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         	$typeId = getIllusionClient()->getIllusionTypeId($eventtype);
         	$genreIds = getIllusionClient()->getIllusionGenreIds(explode(',',$genrestring));
         	
-        	// TODO: $storydesc, 
-        	// TODO: $website1, $website2, $status, $eventfull, 
-        	// TODO: $languagefree
-        	// TODO: email for organizer...
-        	// TODO: Age ranges
-        	
         	$illusionEvent = getIllusionClient()->createEvent(
         			$ADMIN == true, 
         			$eventname, 
