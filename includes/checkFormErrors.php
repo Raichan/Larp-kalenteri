@@ -273,18 +273,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         $organizeremail = pg_escape_string($organizeremail);
         $website1 = pg_escape_string($website1);
         $website2 = pg_escape_string($website2);
-        $illusionSync = $_POST["illusionsync"] == "1" ? "true" : "false";
+        $illusionSync = isset($_POST["illusionsync"]) ? "true" : "false";
         $illusionEventId = null;
         
         // If we're modifying the event, original and modified ones must have same passwords
         if ($proceedurl == "modifySuccess.php") {
             $status = "MODIFIED";
-            $passquery = "SELECT password,illusionId FROM events WHERE id = '" . $eventid . "';";
+            $passquery = "SELECT password FROM events WHERE id = '" . $eventid . "';";
             $results = dbQuery($passquery); // FIX: Check if there's only one
             $res = pg_fetch_assoc($results);
             $password = $res['password'];
-            // when modifying an event illusionEventId is retrieved from the old event
-            $illusionEventId = $illusionSync == "true" ? empty($res['illusionid']) ? null : intval($res['illusionid']) : null;
         } else {
             $status = "PENDING";
             $password = create_random_password();
@@ -302,34 +300,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $status = 'ACTIVE';
         }
         
-        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "')";
+        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "') RETURNING id";
         $result = dbQuery($query);
+        $row = pg_fetch_assoc($result);
+        
+        $newEventId = intval($row['id']);
+        if ($newEventId == null) {
+          throw new Exception("Could not find eventId for new event");
+        }
+        
+        if ($eventid && ($newEventId != $eventid)) {
+        	updateEventIllusionId($newEventId, getEventIllusionIdByEventId($eventid));
+        }
+
+        $eventData = getEventData($newEventId);
+        if ($eventData == null) {
+          throw new Exception("Could not find event data for event $newEventId");
+        }
         
         if ($illusionSync == "true") {
           // Illusion synchronization is enabled so we need to create or update 
           // corresponding event into the Forge & Illusion
-        
-        	$eventId = getEventIdByPassword($password);
-        	if ($eventId == null) {
-        		throw new Exception("Could not find eventId for new event");
-        	}
-        		
-        	$eventData = getEventData($eventId);
-        	if ($eventData == null) {
-        		throw new Exception("Could not find event data for event $eventId");
-        	}
         	
-        	if ($illusionEventId == null) {
-        		// The event is not bound to an Illusion event, so we create one 
+        	if ($eventData['illusionId'] == null) {
+        		// The event is not yet bound to an Illusion event, so we create one 
         		$illusionEvent = getIllusionController()->createEvent($eventData);
-        		updateEventIllusionId($eventId, $illusionEvent['id']);
-        	} else {
-        		// The event is already bound to an Illusion event, so we the existing event
-        		getIllusionController()->updateEvent($eventData);
-        	}
+        		updateEventIllusionId($newEventId, $illusionEvent['id']);
+        	} 
         } else {
         	// If Illusion synchronization is not enabled, we sever the connection between systems 
-        	if ($illusionEventId != null) {
+        	if ($eventData['illusionId'] != null) {
         		// TODO: Inform event organizer about this.
         	  updateEventIllusionId($eventId, null);
         	}

@@ -361,7 +361,7 @@
   		 
   		$participant = $this->client->createEventParticipant($illusionEventId, $user['id'], "ORGANIZER");
   		
-  		return $event;
+  		return $illusionEvent;
   	}
   	
   	public function updateEvent($eventData) {

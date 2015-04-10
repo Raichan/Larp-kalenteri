@@ -153,6 +153,19 @@ function getEventIdByPassword($password) {
 	return null;
 }
 
+function getEventIllusionIdByEventId($id) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$result = dbQueryP('select illusionId from events where id = $1', [$id]);
+	
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+  	return intval($row['illusionid']);
+	}
+	
+	return null;
+}
+
 function updateEventIllusionId($eventId, $illusionEventId) {
 	require_once (__DIR__ . '/connectDB.php');
 	dbQueryP("update events set illusionId = $1 where id = $2", array($illusionEventId, $eventId));
@@ -212,7 +225,7 @@ function getEventData($id) {
 			'eventFull' => $row['eventfull'] == 't',
 			'invitationOnly' => $row['invitationonly'] == 't',
 			'languageFree' => $row['languagefree'] == 't',
-			'illusionId' => intval($row['illusionid'])
+			'illusionId' => empty($row['illusionid']) ? null : intval($row['illusionid'])
 		];
 	}
 	
