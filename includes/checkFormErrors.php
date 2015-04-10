@@ -304,20 +304,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         
         $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "')";
         $result = dbQuery($query);
+        
+        if ($illusionSync == "true") {
+          // Illusion synchronization is enabled so we need to create or update 
+          // corresponding event into the Forge & Illusion
+        
+        	$eventId = getEventIdByPassword($password);
+        	if ($eventId == null) {
+        		throw new Exception("Could not find eventId for new event");
+        	}
+        		
+        	$eventData = getEventData($eventId);
+        	if ($eventData == null) {
+        		throw new Exception("Could not find event data for event $eventId");
+        	}
         	
-				if (($illusionSync == "true") && ($illusionEventId == null)) {
-					$eventId = getEventIdByPassword($password);
-					if ($eventId == null) {
-						throw new Exception("Could not find eventId for new event");
-	   			}
-					
-					$eventData = getEventData($eventId);
-					if ($eventData == null) {
-						throw new Exception("Could not find event data for event $eventId");
-					}
-					
-        	$illusionEvent = getIllusionController()->createEvent($eventData);
-        	updateEventIllusionId($eventId, $illusionEvent['id']);
+        	if ($illusionEventId == null) {
+        		// The event is not bound to an Illusion event, so we create one 
+        		$illusionEvent = getIllusionController()->createEvent($eventData);
+        		updateEventIllusionId($eventId, $illusionEvent['id']);
+        	} else {
+        		// The event is already bound to an Illusion event, so we the existing event
+        		getIllusionController()->updateEvent($eventData);
+        	}
+        } else {
+        	// If Illusion synchronization is not enabled, we sever the connection between systems 
+        	if ($illusionEventId != null) {
+        		// TODO: Inform event organizer about this.
+        	  updateEventIllusionId($eventId, null);
+        	}
         }
         
         if ($result) {
