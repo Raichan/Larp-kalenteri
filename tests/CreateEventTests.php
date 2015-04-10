@@ -91,7 +91,7 @@ class CreateEventTests extends IntegrationTests {
     $this->stubEventTypes();
     $this->stubUsersFindEmpty($organizerEmail);
     $this->stubUserCreate($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail));
-    $this->stubEventParticipantCreate($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
+    $this->stubEventParticipantCreate(123, $this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
     $this->stubEventCreate($this->createEventJson(123, 
       false, 
     	$name, 
@@ -160,6 +160,7 @@ class CreateEventTests extends IntegrationTests {
     // Verify organizer
     $this->verifyPostRequest(1, '/fni/rest/illusion/events/123/participants', $this->createEventParticipantJson(null, 1234, "ORGANIZER", null));
     
+    $this->waitElementVisible(".container div.row:nth-of-type(2) h1");
     $this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
 
   	$this->deleteAllEvents();	
@@ -256,7 +257,7 @@ class CreateEventTests extends IntegrationTests {
     $this->stubEventTypes();
     $this->stubUsersFindEmpty($organizerEmail);
     $this->stubUserCreate($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail));
-    $this->stubEventParticipantCreate($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
+    $this->stubEventParticipantCreate(123, $this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
     $this->stubEventCreate($this->createEventJson(123, 
       false, 
     	$name, 
@@ -405,7 +406,7 @@ class CreateEventTests extends IntegrationTests {
   	$this->stubEventTypes();
   	$this->stubUsersFindEmpty($organizerEmail);
   	$this->stubUserCreate($this->createUserJson(1234, "John", "Doe", null, "fi", $organizerEmail));
-  	$this->stubEventParticipantCreate($this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
+  	$this->stubEventParticipantCreate(123, $this->createEventParticipantJson(12345, 1234, 'ORGANIZER', null));
   	$this->stubEventCreate($this->createEventJson(123,
   			false,
   			$name,

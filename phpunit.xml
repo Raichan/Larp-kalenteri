@@ -4,6 +4,7 @@
   <testsuites>
     <testsuite name="AllTests">
       <file>tests/CreateEventTests.php</file>
+      <file>tests/ModifyEventTests.php</file>
     </testsuite>
   </testsuites>
   

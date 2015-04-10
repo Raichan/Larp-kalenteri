@@ -1,7 +1,7 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../dat/config.php';
+require_once __DIR__ . '/../dat/config.php';
 
 use WireMock\Client\WireMock;
 use WireMock\Client\JsonValueMatchingStrategy;
@@ -71,7 +71,18 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 			$this->wireMock->verify($count, WireMock::postRequestedFor(WireMock::urlMatching($url))->withRequestBody(WireMock::equalToJson($body)));
 		} catch (Exception $e) {
 			$loggedRequests = $this->wireMock->findAll(WireMock::postRequestedFor(WireMock::urlMatching($url)));
-// 			$this->assertEquals("post call count into $url does not match", $count, count($loggedRequests));
+			foreach ($loggedRequests as $logged) {
+				$requestBody = $logged->getBody();
+				$this->assertEquals($body, $requestBody, "requrest body did not match expected body");
+			}
+		}
+	}
+	
+	protected function verifyPutRequest($count, $url, $body) {
+		try {
+			$this->wireMock->verify($count, WireMock::putRequestedFor(WireMock::urlMatching($url))->withRequestBody(WireMock::equalToJson($body)));
+		} catch (Exception $e) {
+			$loggedRequests = $this->wireMock->findAll(WireMock::putRequestedFor(WireMock::urlMatching($url)));
 			foreach ($loggedRequests as $logged) {
 				$requestBody = $logged->getBody();
 				$this->assertEquals($body, $requestBody, "requrest body did not match expected body");
@@ -85,6 +96,22 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 		->setDate($year, $month, $day)
 		->setTime(0, 0, 0)
 		->format('c');
+	}
+	
+	protected function getTimestamp($year, $month, $day) {
+		return (new DateTime())
+		->setTimezone(new DateTimeZone("UTC"))
+		->setDate($year, $month, $day)
+		->setTime(0, 0, 0)
+		->getTimestamp();
+	}
+	
+	protected function getUIDate($year, $month, $day) {
+		return (new DateTime())
+		->setTimezone(new DateTimeZone("UTC"))
+		->setDate($year, $month, $day)
+		->setTime(0, 0, 0)
+		->format('d/m/Y');
 	}
 	
 	protected function stubAccessToken($token) {
@@ -102,7 +129,7 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 				->willReturn(WireMock::aResponse()
 						->withStatus(200)
 						->withHeader('Content-Type', 'application/json')
-						->withBody('[{"id":1,"name":"Larpit"},{"id":2,"name":"Conit ja miitit"},{"id":3,"name":"Kurssit ja tyÃ¶pajat"},{"id":4,"name":"Muut"}]')
+						->withBody('[{"id":1,"name":"Larpit"},{"id":2,"name":"Conit ja miitit"},{"id":3,"name":"Kurssit ja työpajat"},{"id":4,"name":"Muut"}]')
 				)
 		);
 	}
@@ -137,6 +164,16 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 		);
 	}
 	
+	protected function stubEventUpdate($id, $body) {
+		$this->wireMock->stubFor(WireMock::put(WireMock::urlEqualTo('/fni/rest/illusion/events/' . $id))
+				->willReturn(WireMock::aResponse()
+						->withStatus(200)
+						->withHeader('Content-Type', 'application/json')
+						->withBody($body)
+				)
+		);
+	}
+	
 	protected function stubUserCreate($body) {
 		$this->wireMock->stubFor(WireMock::post(WireMock::urlMatching('/fni/rest/users/users.*'))
 				->willReturn(WireMock::aResponse()
@@ -147,8 +184,8 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 		);
 	}
 	
-	protected function stubEventParticipantCreate($body) {
-		$this->wireMock->stubFor(WireMock::post(WireMock::urlEqualTo('/fni/rest/illusion/events/123/participants'))
+	protected function stubEventParticipantCreate($eventId, $body) {
+		$this->wireMock->stubFor(WireMock::post(WireMock::urlEqualTo("/fni/rest/illusion/events/$eventId/participants"))
 				->willReturn(WireMock::aResponse()
 						->withStatus(200)
 						->withHeader('Content-Type', 'application/json')
@@ -230,10 +267,71 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 	}
 	
 	protected function deleteAllEvents() {
+		$dbconn = $this->getDatabaseConnection();
+		pg_query("delete from events") or die('Query failed: ' . pg_last_error());
+		pg_close($dbconn);
+	}
+	
+	protected function createEvent($name, $type, $start, $end, $dateText, $signUpStart, $signUpEnd, $locationDropDown, $location,
+			    $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly, $eventFull, $invitationOnly, $languageFree, $storyDescription, 
+			  	$infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $illusionId) {
+		$dbconn = $this->getDatabaseConnection();
+		
+		$result = pg_query_params(
+		  "insert into events (
+		     eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime,
+			   locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
+				 invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
+				 link1, link2, status, password, illusionId)
+		   values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)",
+				array($name, $type, $start, $end, $dateText, $signUpStart, $signUpEnd, $locationDropDown, $location, $iconUrl, $genre, $cost, 
+					$ageLimit, $beginnerFriendly ? "true" : "false", $eventFull ? "true" : "false", $invitationOnly ? "true" : "false", $languageFree ? "true" : "false", 
+					$storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $illusionId)
+		)  or die('Query failed: ' . pg_last_error());		
+				
+		pg_close($dbconn);
+	}
+	
+	protected function findEventIdByPasswordAndStatus($password, $status) {
+		$dbconn = $this->getDatabaseConnection();
+		$result = pg_query_params("select id from events where password = $1 and status = $2", [$password, $status]) or die('Query failed: ' . pg_last_error());
+		pg_close($dbconn);
+		$row = pg_fetch_assoc($result);
+		return intval($row['id']);
+	}
+	
+	protected function findEventNameById($eventId) {
+		$dbconn = $this->getDatabaseConnection();
+		$result = pg_query_params("select eventname from events where id = $1", [$eventId]) or die('Query failed: ' . pg_last_error());
+		pg_close($dbconn);
+		$row = pg_fetch_assoc($result);
+		return $row['eventname'];
+	}
+	
+	protected function findEventIllusionIdById($eventId) {
+		$dbconn = $this->getDatabaseConnection();
+		$result = pg_query_params("select illusionId from events where id = $1", [$eventId]) or die('Query failed: ' . pg_last_error());
+		pg_close($dbconn);
+		$row = pg_fetch_assoc($result);
+		return empty($row['illusionid']) ? null : intval($row['illusionid']);
+	}
+	
+	protected function assertEventName($eventId, $name) {
+		$this->assertEquals($name, $this->findEventNameById($eventId));
+	}
+	
+	protected function assertEventIllusionId($eventId, $illusionId) {
+		$this->assertEquals($illusionId, $this->findEventIllusionIdById($eventId));
+	}
+	
+	private function getDatabaseConnection() {
 		$d = "host=" . DB_SERVER . " port=" . DB_PORT . " dbname=" . DB_DATABASE . " user=" . DB_USER . " password=" . DB_PASSWORD;
 		$dbconn = pg_connect($d) or die('Could not connect to DB: ' . pg_last_error());
-		$result = pg_query("delete from events") or die('Query failed: ' . pg_last_error());
+		return $dbconn;
 	}
+	
 }
+
+
 
 ?>
