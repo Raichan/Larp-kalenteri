@@ -20,8 +20,9 @@ before_install:
 - sudo apt-add-repository -y ppa:ondrej/apache2
 - sudo apt-add-repository -y ppa:ondrej/php5
 - sudo apt-get update
-- sudo apt-get install apache2 libapache2-mod-php5 php5-pgsql rubygems1.9.1
+- sudo apt-get install apache2 libapache2-mod-php5 php5-pgsql rubygems1.9.1 ruby1.9.1 ruby1.9.1-dev build-essential
 - sudo gem install mailcatcher
+- sudo sed -i "s/^\\;sendmail_path.*$/sendmail_path = \/usr\/bin\/env catchmail/g" /etc/php.ini
 - sudo cp -v ./tests/a2_virtualhost.conf /etc/apache2/sites-available/lk.conf
 - sudo a2ensite lk
 - sudo service apache2 restart
