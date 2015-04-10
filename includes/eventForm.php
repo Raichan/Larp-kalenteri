@@ -194,7 +194,7 @@ if (isset($_SESSION["valid"])) {
         
         <p>
           <span>
-            <input id="illusionsync" name="illusionsync" type="checkbox" value="1"<?php if (!empty($illusionSync) && $illusionSync == "t") echo ' checked="checked" : '?>data-date-required="<?php echo $daterequired_illusion ?>"/>
+            <input id="illusionsync" name="illusionsync" type="checkbox" value="1"<?php if ($illusionSync == true) echo ' checked="checked" : '?>data-date-required="<?php echo $daterequired_illusion ?>"/>
             <label for="illusionsync"><?php echo $label_illusion; ?></label>
           </span>
           <p>
