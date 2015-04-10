@@ -283,6 +283,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $results = dbQuery($passquery); // FIX: Check if there's only one
             $res = pg_fetch_assoc($results);
             $password = $res['password'];
+            $originalIllusionId = getEventIllusionIdByEventId($eventid);
         } else {
             $status = "PENDING";
             $password = create_random_password();
@@ -310,7 +311,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         }
         
         if ($eventid && ($newEventId != $eventid)) {
-        	updateEventIllusionId($newEventId, getEventIllusionIdByEventId($eventid));
+        	updateEventIllusionId($newEventId, $originalIllusionId);
         }
 
         $eventData = getEventData($newEventId);
@@ -326,7 +327,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         		// The event is not yet bound to an Illusion event, so we create one 
         		$illusionEvent = getIllusionController()->createEvent($eventData);
         		updateEventIllusionId($newEventId, $illusionEvent['id']);
-        	} 
+        	} else {
+        		if ($ADMIN == true) {
+        			getIllusionController()->updateEvent($eventData);
+        		}
+        	}
         } else {
         	// If Illusion synchronization is not enabled, we sever the connection between systems 
         	if ($eventData['illusionId'] != null) {
