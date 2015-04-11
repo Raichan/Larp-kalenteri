@@ -589,6 +589,7 @@ class ModifyEventTests extends IntegrationTests {
   	$this->assertContains('Muokkaa tapahtumaa', $this->findElement(".container h2")->getText());
 
   	$this->findElement("#eventname")->clear()->sendKeys($modName);
+  	$this->select("#eventtype", $modType);
   	$this->findElement("#datestart")->clear()->sendKeys($modStartUI);
   	$this->findElement("#dateend")->clear()->sendKeys($modEndUI);
   	$this->select("#location1", $modLocationDropDown);
