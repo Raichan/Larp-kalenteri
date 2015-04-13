@@ -191,8 +191,7 @@ $text_deletesuccess = "Your event was deleted successfully.";
 // includes/emails.php
 
 $admin_subject = 'Pending event in larp calendar';
-$admin_msg1 = 'An event ';
-$admin_msg2 = '
+$admin_msg = 'An event 
 	has been submitted or modified in the larp calendar
 	and requires your attention.
 	

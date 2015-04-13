@@ -191,8 +191,7 @@ $text_deletesuccess = "Tapahtumasi poistettiin onnistuneesti.";
 // includes/emails.php
 
 $admin_subject = 'Tapahtuma larp-kalenterissa';
-$admin_msg1 = 'Larp-kalenterissa on uusi tai muokattu tapahtuma, ';
-$admin_msg2 = '
+$admin_msg = 'Larp-kalenterissa on uusi tai muokattu tapahtuma, 
 	joka vaatii tarkistusta.
 	
 	Kirjaudu sisään nähdäksesi tapahtuman:
