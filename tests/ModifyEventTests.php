@@ -32,6 +32,7 @@ class ModifyEventTests extends IntegrationTests {
   
   public function tearDown() {
    	$this->webDriver->quit();
+   	$this->clearEmails();
   }
   
   public function testModifyEvent() {
@@ -109,6 +110,16 @@ class ModifyEventTests extends IntegrationTests {
   	
   	$this->assertEventName($eventId, $name);
   	$this->assertEventIllusionId($eventId, null);
+
+  	// Test that admins received an email about event modification
+  	$adminEmails = $this->listAdminMails();
+  	$sentEmails = $this->getEmails();
+  	$this->assertEquals(count($adminEmails), count($sentEmails));
+  	for ($i = 0; $i < count($adminEmails); $i++) {
+  		$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+  		$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+  	}
+  	  	
   	$this->deleteAllEvents();	
   }
   
@@ -187,7 +198,16 @@ class ModifyEventTests extends IntegrationTests {
   	
   	$this->assertEventName($eventId, $name);
   	$this->assertEventIllusionId($eventId, 1234);
-  	
+
+  	// Test that admins received an email about event modification
+  	$adminEmails = $this->listAdminMails();
+  	$sentEmails = $this->getEmails();
+  	$this->assertEquals(count($adminEmails), count($sentEmails));
+  	for ($i = 0; $i < count($adminEmails); $i++) {
+  		$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+  		$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+  	}
+  	  	
   	$this->deleteAllEvents();	
   }
   
@@ -340,7 +360,16 @@ class ModifyEventTests extends IntegrationTests {
   			$modEndREST,
   			[])
   	);
-  	 
+
+  	// Test that admins received an email about event modification
+  	$adminEmails = $this->listAdminMails();
+  	$sentEmails = $this->getEmails();
+  	$this->assertEquals(count($adminEmails), count($sentEmails));
+  	for ($i = 0; $i < count($adminEmails); $i++) {
+  		$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+  		$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+  	}
+  	
   	$this->deleteAllEvents();
   }
 
@@ -489,7 +518,10 @@ class ModifyEventTests extends IntegrationTests {
   			$modEndREST,
   			[])
   	);
-  
+
+  	// Assert that no mails were sent
+  	$this->assertEquals(0, count($this->getEmails()));
+  	  
   	$this->deleteAllEvents();
   }
   
@@ -632,7 +664,10 @@ class ModifyEventTests extends IntegrationTests {
 	    $modEndREST,
 	    [])
     );
-  	
+
+    // Assert that no mails were sent
+    $this->assertEquals(0, count($this->getEmails()));
+      	
   	$this->deleteAllEvents();	
   }
 }
