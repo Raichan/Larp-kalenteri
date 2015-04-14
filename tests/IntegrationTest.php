@@ -9,6 +9,7 @@ use WireMock\Client\JsonValueMatchingStrategy;
 class IntegrationTests extends PHPUnit_Framework_TestCase {
 	
 	protected $base_url = "http://kalenteri.larp.dev";
+	protected $catchmail_url = 'http://127.0.0.1:1080';
 	
 	protected function createLocalWebDriver($capabilities) {
 		return RemoteWebDriver::create("http://localhost:4444/wd/hub", $capabilities);
@@ -315,6 +316,20 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 		$row = pg_fetch_assoc($result);
 		return empty($row['illusionid']) ? null : intval($row['illusionid']);
 	}
+
+	protected function listAdminMails() {
+		$emails = [];
+		
+		$dbconn = $this->getDatabaseConnection();
+		$result = pg_query("select email from admins") or die('Query failed: ' . pg_last_error());
+		pg_close($dbconn);
+		
+		while ($row = pg_fetch_assoc($result)) {
+			$emails[] = $row['email'];
+		}
+		
+		return $emails;
+	}
 	
 	protected function assertEventName($eventId, $name) {
 		$this->assertEquals($name, $this->findEventNameById($eventId));
@@ -328,6 +343,61 @@ class IntegrationTests extends PHPUnit_Framework_TestCase {
 		$d = "host=" . DB_SERVER . " port=" . DB_PORT . " dbname=" . DB_DATABASE . " user=" . DB_USER . " password=" . DB_PASSWORD;
 		$dbconn = pg_connect($d) or die('Could not connect to DB: ' . pg_last_error());
 		return $dbconn;
+	}
+	
+	protected function getEmails() {
+		$client = new GuzzleHttp\Client([
+			'base_url' => $this->catchmail_url
+	  ]);
+		
+		$jsonResponse = $client->get('/messages');
+		return json_decode($jsonResponse->getBody());
+	}
+	
+	protected function clearEmails() {
+		$client = new GuzzleHttp\Client([
+			'base_url' => $this->catchmail_url
+	  ]);
+		
+		$client->delete('/messages');
+	}
+	
+	protected function getEmailPlain($emailId) {
+		$client = new GuzzleHttp\Client([
+		  'base_url' => $this->catchmail_url
+		]);
+		
+		return $client->get('/messages/' . $emailId . '.plain')->getBody()->getContents();
+	}
+	
+	protected function getEmailHtml($emailId) {
+		$client = new GuzzleHttp\Client([
+				'base_url' => $this->catchmail_url
+		]);
+		
+		return $client->get('/messages/' . $emailId . '.html')->getBody()->getContents();
+	}
+	
+	protected function assertEmailHtmlContains($text, $emailId) {
+		$this->assertContains($text, $this->getEmailHtml($emailId));
+	}
+	
+	protected function assertEmailPlainContains($text, $emailId) {
+		$this->assertContains($text, $this->getEmailPlain($emailId));
+	}
+	
+	protected function assertEmailPlainNotContains($text, $emailId) {
+		$this->assertNotContains($text, $this->getEmailPlain($emailId));
+	}
+	
+	protected function assertEmailRecipient($recipient, $email) {
+		foreach ($email->recipients as $emailRecipient) {
+			if (preg_match("/.*<$recipient>/", $emailRecipient) == 1) {
+				return;
+			}
+		}
+		
+		$this->fail("$recipient was not a recipient of email " . $email->id);
 	}
 	
 }

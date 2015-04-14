@@ -32,6 +32,7 @@ class CreateEventTests extends IntegrationTests {
   
   public function tearDown() {
    	$this->webDriver->quit();
+    $this->clearEmails();
   }
   
   public function testCreateEvent() {
@@ -66,6 +67,15 @@ class CreateEventTests extends IntegrationTests {
   	$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
   	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
+  	
+		// Test that admins received an email about the new event
+  	$adminEmails = $this->listAdminMails();
+  	$sentEmails = $this->getEmails();
+  	$this->assertEquals(count($adminEmails), count($sentEmails));
+  	for ($i = 0; $i < count($adminEmails); $i++) {
+  		$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+  		$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+  	}
   	
   	$this->deleteAllEvents();	
   }
@@ -163,6 +173,15 @@ class CreateEventTests extends IntegrationTests {
     $this->waitElementVisible(".container div.row:nth-of-type(2) h1");
     $this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
 
+		// Test that admins received an email about the new event
+    $adminEmails = $this->listAdminMails();
+    $sentEmails = $this->getEmails();
+    $this->assertEquals(count($adminEmails), count($sentEmails));
+    for ($i = 0; $i < count($adminEmails); $i++) {
+    	$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+    	$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+    }
+    
   	$this->deleteAllEvents();	
   }
     
@@ -220,6 +239,15 @@ class CreateEventTests extends IntegrationTests {
   	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
+		// Test that admins received an email about the new event
+  	$adminEmails = $this->listAdminMails();
+  	$sentEmails = $this->getEmails();
+  	$this->assertEquals(count($adminEmails), count($sentEmails));
+  	for ($i = 0; $i < count($adminEmails); $i++) {
+  		$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+  		$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+  	}
+  	  	
   	$this->deleteAllEvents();	
   }
     
@@ -344,6 +372,15 @@ class CreateEventTests extends IntegrationTests {
     
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
   	
+		// Test that admins received an email about the new event
+  	$adminEmails = $this->listAdminMails();
+  	$sentEmails = $this->getEmails();
+  	$this->assertEquals(count($adminEmails), count($sentEmails));
+  	for ($i = 0; $i < count($adminEmails); $i++) {
+  		$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+  		$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+  	}
+  	
   	$this->deleteAllEvents();	
   }
 
@@ -380,7 +417,10 @@ class CreateEventTests extends IntegrationTests {
   	$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
   	 
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
-  	 
+  	
+		// Assert that no mails were sent 
+  	$this->assertEquals(0, count($this->getEmails()));
+  	
   	$this->deleteAllEvents();
   }
 
@@ -476,7 +516,10 @@ class CreateEventTests extends IntegrationTests {
   	$this->verifyPostRequest(1, '/fni/rest/illusion/events/123/participants', $this->createEventParticipantJson(null, 1234, "ORGANIZER", null));
   	
   	$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
-  	
+
+  	// Assert that no mails were sent
+  	$this->assertEquals(0, count($this->getEmails()));
+  	  	
   	$this->deleteAllEvents();
   }
 
@@ -507,7 +550,16 @@ class CreateEventTests extends IntegrationTests {
 		$this->wireMock->verify(0, WireMock::postRequestedFor(WireMock::urlEqualTo('/fni/rest/illusion/events')));
 		 
 		$this->assertContains('Tapahtuma lähetetty onnistuneesti', $this->findElement(".container div.row:nth-of-type(2) h1")->getText());
-		 
+		
+		// Test that admins received an email about the new event
+		$adminEmails = $this->listAdminMails();
+		$sentEmails = $this->getEmails();
+		$this->assertEquals(count($adminEmails), count($sentEmails));
+		for ($i = 0; $i < count($adminEmails); $i++) {
+			$this->assertEmailPlainContains("vaatii tarkistusta", $sentEmails[$i]->id);
+			$this->assertEmailRecipient($adminEmails[$i], $sentEmails[$i]);
+		}
+		
 		$this->deleteAllEvents();
 	}
 }
