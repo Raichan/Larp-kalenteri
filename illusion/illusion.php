@@ -82,7 +82,9 @@
   	    'json' => $event
   		]);
   		
-  		if ($response->getStatusCode() == 204) {
+  	  if ($response->getStatusCode() == 200) {
+  			return $response->json();
+  		} else if ($response->getStatusCode() == 204) {
   			return $event;
   		}
   		
@@ -311,6 +313,10 @@
   		$this->client = new FnIClient(FNI_BASE_URL, FNI_CLIENT_ID, FNI_CLIENT_SECRET);
   	}
   	
+  	public function findUserByEmail($email) {
+  		return $this->client->findUserByEmail($email);
+  	}
+  	
   	public function createEvent($eventData) {
   		$typeId = $this->client->getIllusionTypeId($eventData['type']);
   		$genreIds = $this->client->getIllusionGenreIds($eventData['genres']);
@@ -338,7 +344,7 @@
   	  );
 
   		$illusionEventId = $illusionEvent['id'];
-  		$user = $this->client->findUserByEmail($eventData['organizerEmail']);
+  		$user = $this->findUserByEmail($eventData['organizerEmail']);
   		if (!$user) {
   			// user does not yet exist on the Forge & Illusion so we create new with given password
   		

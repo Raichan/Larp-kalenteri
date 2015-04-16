@@ -171,6 +171,24 @@ function updateEventIllusionId($eventId, $illusionEventId) {
 	dbQueryP("update events set illusionId = $1 where id = $2", array($illusionEventId, $eventId));
 }
 
+function getEventFnIUserCreatedByEventId($id) {
+	require_once (__DIR__ . '/connectDB.php');
+
+	$result = dbQueryP('select fniusercreated from events where id = $1', [$id]);
+
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+		return $row['fniusercreated'] == "t";
+	}
+
+	return false;
+}
+
+function updateEventFnIUserCreated($eventId, $fniUserCreated) {
+	require_once (__DIR__ . '/connectDB.php');
+	dbQueryP("update events set fniUserCreated = $1 where id = $2", array($fniUserCreated ? 't' : 'f', $eventId));
+}
+
 function strToDate($str) {
 	if (empty($str)) {
 		return null;

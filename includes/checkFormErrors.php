@@ -325,8 +325,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         	
         	if ($eventData['illusionId'] == null) {
         		// The event is not yet bound to an Illusion event, so we create one 
+        		$newUser = getIllusionController()->findUserByEmail($eventData['organizerEmail']);
         		$illusionEvent = getIllusionController()->createEvent($eventData);
         		updateEventIllusionId($newEventId, $illusionEvent['id']);
+        		updateEventFnIUserCreated($newEventId, $newUser == null);
         	} else {
         		if ($ADMIN == true) {
         			getIllusionController()->updateEvent($eventData);
