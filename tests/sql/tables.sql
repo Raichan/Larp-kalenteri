@@ -40,7 +40,8 @@ CREATE TABLE events (
   link2 character varying(500),
   status character varying(100),
   password character varying(100),
-  illusionId bigint default null
+  illusionId bigint default null,
+  fniUserCreated boolean default false
 );
 
 ALTER SEQUENCE unique_id_events owned by events.id;
