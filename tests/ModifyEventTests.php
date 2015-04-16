@@ -83,7 +83,8 @@ class ModifyEventTests extends IntegrationTests {
   			null, 
   			"ACTIVE", 
   			$password, 
-  			null);
+  			null,
+  			false);
   	
   	$eventId = $this->findEventIdByPasswordAndStatus($password, "ACTIVE");
   	$this->assertEventName($eventId, $name);
@@ -171,7 +172,8 @@ class ModifyEventTests extends IntegrationTests {
   			null, 
   			"ACTIVE", 
   			$password, 
-  			1234);
+  			1234,
+  			true);
   	
   	$eventId = $this->findEventIdByPasswordAndStatus($password, "ACTIVE");
   	$this->assertEventName($eventId, $name);
@@ -294,7 +296,8 @@ class ModifyEventTests extends IntegrationTests {
   			null,
   			"ACTIVE",
   			$password,
-  			null);
+  			null, 
+  			false);
 
   	$eventId = $this->findEventIdByPasswordAndStatus($password, "ACTIVE");
   	 
@@ -458,7 +461,8 @@ class ModifyEventTests extends IntegrationTests {
   			null,
   			"ACTIVE",
   			$password,
-  			null);
+  			null, 
+  			false);
   
   	$eventId = $this->findEventIdByPasswordAndStatus($password, "ACTIVE");
   	$this->assertEventName($eventId, $name);
@@ -607,7 +611,8 @@ class ModifyEventTests extends IntegrationTests {
   			null, 
   			"ACTIVE", 
   			$password, 
-  			1234);
+  			1234, 
+  			true);
   	
   	$eventId = $this->findEventIdByPasswordAndStatus($password, "ACTIVE");
   	$this->assertEventName($eventId, $name);

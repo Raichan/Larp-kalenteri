@@ -1,7 +1,7 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/IntegrationTest.php';
+require_once __DIR__ . '/IntegrationTest.php';
 
 use WireMock\Client\WireMock;
 
