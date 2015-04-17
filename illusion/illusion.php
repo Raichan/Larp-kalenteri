@@ -306,7 +306,17 @@
   }
   
   class IllusionController {
+
+  	private static $instance;
   	 
+  	public static function getInstance() {
+  		if ( is_null( self::$instance ) ) {
+  			self::$instance = new self();
+  		}
+  	
+  		return self::$instance;
+  	}
+  	
   	private $client;
   	 
   	public function __construct() {
@@ -405,7 +415,7 @@
   }
 
   function getIllusionController() {
-  	return new IllusionController();
+  	return IllusionController::getInstance();
   }
 
 ?>
