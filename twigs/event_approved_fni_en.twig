@@ -1,28 +1,28 @@
 {% if modified %}
-Muokkaukset tapahtumaasi on hyväksytty larp-kalenteriin sekä Forge & Illusionin tapahtumakalenteriin. 
+Modifications into your event has been approved into the larp calendar and the Forge & Illusion event calendar.
 {% else %}
-Tapahtumasi on hyväksytty larp-kalenteriin sekä Forge & Illusionin tapahtumakalenteriin. 
+Your event has been approved into the larp calendar and the Forge & Illusion event calendar. 
 {% endif %}
 
-Pääset katselemaan tapahtumaa larp-kalenterissa osoitteessa {{ eventurl }} ja 
-Forge & Illusionissa osoitteessa: {{ fnieventurl }}. 
+You can view your event in the larp calendar at {{ eventurl }} and 
+in the Forge & Illusion at {{ fnieventurl }}. 
 
-Voit muokata tapahtumaasi Larp-kalenterissa käyttämällä salasanaa {{ password }}
+You can modify your event in the larp calendar using following password: {{ password }}
 
 {% if fniusercreated %}
-Sinulle on luotu tunnukset Forge & Illusioniin. Sisäänkirjautuminen tapahtuu käyttämällä tunnuksia:
+New Forge & Illusion account has also been created for you. You can now login using following credentials:
 
-Sähköposti: {{ fniemail }}
-Salasana: {{ fnipassword }}
+E-mail: {{ fniemail }}
+Password: {{ fnipassword }}
 {% else %}
-Tapahtuma on liitetty tiliin Forge & Illusion tiliisi {{ fniemail }}.
+The event has been added to your Forge & Illusion account {{ fniemail }}.
 {% endif %}
 
-Pääset muokkaamaan tapahtumaa kirjautumalla sisään tunnuksillasi tapahtuman sivulla.
+You can modify Forge & Illusion event by loggin in in the event page.
 
 {% if not comments is empty %}
-Ylläpidon kommentit: 
+Comments from administrators:
 {{ comments }}
 
 {% endif %}
-Lähetä sähköpostia osoitteeseen larp.kalenteri@gmail.com jos sinulla on kysymyksiä.
+Please contact larp.kalenteri@gmail.com if you have any questions.
