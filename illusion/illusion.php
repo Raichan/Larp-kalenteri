@@ -8,11 +8,35 @@
   	private $base_url;
   	private $client_id;
   	private $client_secret;
+  	private $client;
   	
   	public function __construct($base_url, $client_id, $client_secret) {
   		$this->base_url = $base_url;
   		$this->client_id = $client_id;
   		$this->client_secret = $client_secret;
+  		
+  		$handler = new GuzzleHttp\Ring\Client\StreamHandler();
+  		
+  		$oauth2Client = new GuzzleHttp\Client([
+  		  'handler' => $handler,
+  		  'base_url' => "$this->base_url/"
+  		]);
+  		
+  		$config = [
+  		  'client_id' => $this->client_id,
+  			'client_secret' => $this->client_secret
+  		];
+  		
+  		$token = new CommerceGuys\Guzzle\Oauth2\GrantType\ClientCredentials($oauth2Client, $config);
+  		$refreshToken = new CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken($oauth2Client, $config);
+  		$oauth2 = new CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber($token, $refreshToken);
+  		$this->client = new GuzzleHttp\Client([
+  		  'handler' => $handler,
+  			'defaults' => [
+  			  'auth' => 'oauth2',
+  				'subscribers' => [$oauth2]
+  			]
+  		]);
   	}
   	
   	public function createEvent($published, $name, $description, $urlName, $joinMode, $signUpFeeText, $signUpFee, $signUpFeeCurrency, $location, $ageLimit, $beginnerFriendly, $imageUrl, $typeId, $signUpStartDate, $signUpEndDate, $domain, $start, $end, $genreIds) {
@@ -41,7 +65,7 @@
   			'genreIds' => $genreIds
   		);
   		
-  		$response = $this->createClient()->post("$this->base_url/rest/illusion/events", [
+  		$response = $this->getClient()->post("$this->base_url/rest/illusion/events", [
   	    'json' => $event
   		]);
   		
@@ -78,7 +102,7 @@
   			"genreIds" => $genreIds
   		);
   		
-  		$response = $this->createClient()->put("$this->base_url/rest/illusion/events/$id", [
+  		$response = $this->getClient()->put("$this->base_url/rest/illusion/events/$id", [
   	    'json' => $event
   		]);
   		
@@ -118,7 +142,7 @@
   	}
   	
   	public function findUserByEmail($email) {
-  		$response = $this->createClient()->get("$this->base_url/rest/users/users", [
+  		$response = $this->getClient()->get("$this->base_url/rest/users/users", [
     		'query' => ['email' => $email]
 			]);
   		
@@ -130,7 +154,7 @@
   	}
   	
   	public function createUser($email, $firstName, $lastName, $locale, $password) {
-  		$response = $this->createClient()->post("$this->base_url/rest/users/users", [
+  		$response = $this->getClient()->post("$this->base_url/rest/users/users", [
   			'json' => [
   				'id' => null,
   				'firstName' => $firstName,
@@ -154,7 +178,7 @@
   	}
   	
   	public function createEventParticipant($eventId, $userId, $role) {
-  		$response = $this->createClient()->post("$this->base_url/rest/illusion/events/$eventId/participants", [
+  		$response = $this->getClient()->post("$this->base_url/rest/illusion/events/$eventId/participants", [
   		  'json' => [
   				'id' => null,
 					'userId' => $userId,
@@ -171,7 +195,7 @@
   	}
   	
   	private function listIllusionGenres() {
-  		$response = $this->createClient()->get("$this->base_url/rest/illusion/genres");
+  		$response = $this->getClient()->get("$this->base_url/rest/illusion/genres");
   		
   		if ($response->getStatusCode() == 200) {
   			return $response->json();
@@ -241,7 +265,7 @@
   	}
   	
   	private function listIllusionTypes() {
-  		$response = $this->createClient()->get("$this->base_url/rest/illusion/types");
+  		$response = $this->getClient()->get("$this->base_url/rest/illusion/types");
   		
   		if ($response->getStatusCode() == 200) {
   			return $response->json();
@@ -276,31 +300,8 @@
   		return null;
    	}
 
-  	private function createClient() {
-  		$handler = new GuzzleHttp\Ring\Client\StreamHandler();
-
-  		$oauth2Client = new GuzzleHttp\Client([
-  		  'handler' => $handler,
-  			'base_url' => "$this->base_url/"
-  		]);
-  		
-  		$config = [
-  		  'client_id' => $this->client_id,
-  		  'client_secret' => $this->client_secret
-  		];
-  		
-  		$token = new CommerceGuys\Guzzle\Oauth2\GrantType\ClientCredentials($oauth2Client, $config);
-  		$refreshToken = new CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken($oauth2Client, $config);
-  		$oauth2 = new CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber($token, $refreshToken);
-  		$client = new GuzzleHttp\Client([
-  		  'handler' => $handler,
-  			'defaults' => [
-  				'auth' => 'oauth2',
-  				'subscribers' => [$oauth2]
- 				]
-  		]);
-  		
-  		return $client;
+  	private function getClient() {
+  		return $this->client;
   	}
   	
   }
