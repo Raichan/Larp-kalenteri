@@ -10,11 +10,12 @@
   		$this->twig = new Twig_Environment(new Twig_Loader_Filesystem( __DIR__ . '/../twigs'));
   	}
   	
-  	public function sendApprovedFnI($recipient, $event_url, $fni_event_url, $email, $password, $fni_user_created, $comments) {
+  	public function sendApprovedFnI($recipient, $modified, $event_url, $fni_event_url, $email, $password, $fni_user_created, $comments) {
   		$locale = isset($_COOKIE["language"]) && ($_COOKIE["language"] == 'en') ? 'en' : 'fi';
       include (__DIR__ . "/lang_$locale.php");
   		
   		$body = $this->twig->render("event_approved_fni_$locale.twig", [
+  			'modified' => $modified,
      		'eventurl' => "http://kalenteri.larp.fi",
      		'fnieventurl' => $fni_event_url,
      		'password' => $password,

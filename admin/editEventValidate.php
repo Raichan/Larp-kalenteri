@@ -31,16 +31,24 @@ if (isset($_POST["comment"])) {
 $event = getCeventObject($eventId);
 if ($event != null) {
     if ($action == "a") {
-      $ret = approveEvent($eventId);
       $event_data = getEventData($eventId);
-      $fni_event = getIllusionController()->updateEvent($event_data);
+      $original_id = $event_data['status'] == 'MODIFIED' ? getEventIdByPasswordAndStatus($event_data['password'], "ACTIVE") : null;
       
-    	if ($fni_event != null) {
+      $ret = approveEvent($eventId);
+      
+      if ($original_id == null) {
+        $fni_event = getIllusionController()->updateEvent($event_data);
+      } else {
+      	$fni_event = getIllusionController()->updateEvent(getEventData($original_id));
+      }
+      
+      if ($fni_event != null) {
     		$fni_user_created = getEventFnIUserCreatedByEventId($event_data['id']);
     		$recipient = [ 'mail' => $event_data['organizerEmail'], 'name' => $event_data['organizerName']];
     		
     	  (new Mailer())->sendApprovedFnI(
-    	     $recipient, 
+    	  	 $recipient, 
+    	  	 $original_id != null,
     	  	 "http://larp.kalenteri.fi", 
     	  	 "http://www.forgeandillusion.net/illusion/event/" . $fni_event['urlName'], 
     	  	 $event_data['organizerEmail'], 

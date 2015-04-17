@@ -140,10 +140,10 @@ function getListOfEvents($month, $day, $year) {
     }
 }
 
-function getEventIdByPassword($password) {
+function getEventIdByPasswordAndStatus($password, $status) {
 	require_once (__DIR__ . '/connectDB.php');
 	
-	$result = dbQueryP('select id from events where password = $1', [$password]);
+	$result = dbQueryP('select id from events where password = $1 and status = $2', [$password, $status]);
 	
 	if ($result) {
 		$row = pg_fetch_assoc($result);
@@ -351,15 +351,13 @@ function approveEvent($eventId) {
     }
     
     // If it's a modified event, the original event will be updated and the modified one will be deleted
-    if (strpos($res['status'], "MODIFIED") !== false) {
-        $originalEvent = $res['password'];
-        $replacequery = "UPDATE events SET (eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2) = ('" . cleanData($res['eventname']) . "', '" . cleanData($res['eventtype']) . "', '" . cleanData($res['startdate']) . "', '" . cleanData($res['enddate']) . "', '" . cleanData($res['datetextfield']) . "', '" . cleanData($res['startsignuptime']) . "', '" . cleanData($res['endsignuptime']) . "', '" . cleanData($res['locationdropdown']) . "', '" . cleanData($res['locationtextfield']) . "', '" . cleanData($res['iconurl']) . "', '" . cleanData($res['genre']) . "', '" . cleanData($res['cost']) . "', '" . cleanData($res['agelimit']) . "', '" . cleanData($res['beginnerfriendly']) . "', '" . cleanData($res['storydescription']) . "', '" . cleanData($res['infodescription']) . "', '" . cleanData($res['organizername']) . "', '" . cleanData($res['organizeremail']) . "', '" . cleanData($res['link1']) . "', '" . cleanData($res['link2']) . "') WHERE password = '" . $originalEvent . "';";
+    if ($res['status'] == "MODIFIED") {
+    	  $activeEvent = getEventIdByPasswordAndStatus($res['password'], "ACTIVE");
+    	  $replacequery = "UPDATE events SET (eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2) = ('" . cleanData($res['eventname']) . "', '" . cleanData($res['eventtype']) . "', '" . cleanData($res['startdate']) . "', '" . cleanData($res['enddate']) . "', '" . cleanData($res['datetextfield']) . "', '" . cleanData($res['startsignuptime']) . "', '" . cleanData($res['endsignuptime']) . "', '" . cleanData($res['locationdropdown']) . "', '" . cleanData($res['locationtextfield']) . "', '" . cleanData($res['iconurl']) . "', '" . cleanData($res['genre']) . "', '" . cleanData($res['cost']) . "', '" . cleanData($res['agelimit']) . "', '" . cleanData($res['beginnerfriendly']) . "', '" . cleanData($res['storydescription']) . "', '" . cleanData($res['infodescription']) . "', '" . cleanData($res['organizername']) . "', '" . cleanData($res['organizeremail']) . "', '" . cleanData($res['link1']) . "', '" . cleanData($res['link2']) . "') WHERE id = '" . $activeEvent . "';";
         $replaceresults = dbQuery($replacequery);
-        $replaceres = pg_fetch_assoc($replaceresults);
-        if ($replaceres == null) {
-            return false;
-        }
-        $deleteresult = deleteEvent($eventid);
+        dbQueryP("update events set illusionid = (select illusionid from events where id = $1) where id = $2", [ $eventId, $activeEvent ]);
+        
+        $deleteresult = deleteEvent($eventId);
         return $deleteresult;
     }
     // If it's a new event, it will just be turned active
