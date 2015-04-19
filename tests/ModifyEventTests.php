@@ -1,11 +1,11 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/IntegrationTest.php';
+require_once __DIR__ . '/UITest.php';
 
 use WireMock\Client\WireMock;
 
-class ModifyEventTests extends IntegrationTests {
+class ModifyEventTests extends UITest {
 	
 	protected $base_url = "http://kalenteri.larp.dev";
 	protected $wireMock;

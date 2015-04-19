@@ -1,11 +1,11 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/IntegrationTest.php';
+require_once __DIR__ . '/UITest.php';
 
 use WireMock\Client\WireMock;
 
-class AdminAcceptEventTests extends IntegrationTests {
+class AdminAcceptEventTests extends UITest {
 	
 	protected $base_url = "http://kalenteri.larp.dev";
 	protected $wireMock;
@@ -13,21 +13,26 @@ class AdminAcceptEventTests extends IntegrationTests {
 	protected $capabilities;
 	
   public function setUp() {
-	  $sauceUser = getenv("SAUCE_USERNAME");
-  	$sauceKey = getenv("SAUCE_ACCESS_KEY");
-  	$travisJobNumber = getenv("TRAVIS_JOB_NUMBER");
-  	$travisBuildNumber = getenv("TRAVIS_BUILD_NUMBER");
-  	$this->capabilities = DesiredCapabilities::chrome();
-  	 
-  	if (!empty($sauceUser) && !empty($sauceKey) && !empty($travisJobNumber) && !empty($travisBuildNumber)) {
-  		// Travis / Sauce Labs
-  		$this->webDriver = $this->createSauceLabsWebDriver($this->capabilities, $sauceUser, $sauceKey, $travisJobNumber, $travisBuildNumber);
-  	} else {
-  		// Local
-  		$this->webDriver = $this->createLocalWebDriver($this->capabilities);
+  	try {
+		  $sauceUser = getenv("SAUCE_USERNAME");
+	  	$sauceKey = getenv("SAUCE_ACCESS_KEY");
+	  	$travisJobNumber = getenv("TRAVIS_JOB_NUMBER");
+	  	$travisBuildNumber = getenv("TRAVIS_BUILD_NUMBER");
+	  	$this->capabilities = DesiredCapabilities::chrome();
+	  	 
+	  	if (!empty($sauceUser) && !empty($sauceKey) && !empty($travisJobNumber) && !empty($travisBuildNumber)) {
+	  		// Travis / Sauce Labs
+	  		$this->webDriver = $this->createSauceLabsWebDriver($this->capabilities, $sauceUser, $sauceKey, $travisJobNumber, $travisBuildNumber);
+	  	} else {
+	  		// Local
+	  		$this->webDriver = $this->createLocalWebDriver($this->capabilities);
+	  	}
+	  	 
+	  	$this->wireMock = $this->createFnIWireMock();
+  	} catch (Exception $e) {
+  		echo $e->getMessage();
+  		throw $e;
   	}
-  	 
-  	$this->wireMock = $this->createFnIWireMock();
   }
   
   public function tearDown() {
