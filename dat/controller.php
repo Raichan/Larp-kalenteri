@@ -200,6 +200,34 @@ function strToDate($str) {
 	->setTime(0, 0, 0);
 }
 
+function getEventIds() {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$ids = [];
+
+	$result = dbQuery("select id from events");
+	
+	while ($row = pg_fetch_assoc($result)) {
+		$ids[] = $row['id'];
+	}
+	
+	return $ids;
+}
+
+function getEventIdsByStatus($status) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$ids = [];
+
+	$result = dbQueryP("select id from events where status = $1", [$status]);
+	
+	while ($row = pg_fetch_assoc($result)) {
+		$ids[] = $row['id'];
+	}
+	
+	return $ids;
+}
+
 function getEventData($id) {
 	require_once (__DIR__ . '/connectDB.php');
 	
@@ -216,6 +244,9 @@ function getEventData($id) {
 	
 	if ($result) {
 		$row = pg_fetch_assoc($result);
+		if (!$row) {
+			return;
+		}
 		
 		return [
 		  'id' => intval($row['id']),
