@@ -1,40 +1,74 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/events.php';
+require_once __DIR__ . '/../dat/controller.php';
+require_once __DIR__ . '/model.php';
 
-use RestService\Server;
-use RestService\Client;
+$app = new \Slim\Slim();
 
-class APIClient extends Client {
-	
-	public function asPlainJSON($pMessage) {
-		if ($pMessage['status'] == 200) {
-			return $this->asJSON($pMessage['data']);
-		} 
+/**
+ * Create event
+ */
+$app->post('/events/', function () use ($app) {
+	$response->status(501);
+});
 
-		$message = isset($pMessage['message']) ? $pMessage['message'] : null;
-		return $message != null ? $message : $this->asJSON($pMessage);
+/**
+ * List events
+ */
+$app->get('/events/', function () use ($app) {
+	$result = [];
+		
+	$event_ids = null;
+	if (isset($status)) {
+		$event_ids = getEventIdsByStatus($status);
+	} else {
+		$event_ids = getEventIds();
 	}
 	
-}
+	foreach ($event_ids as $event_id) {
+		$result[] = Event::fromEventData(getEventData($event_id))->toObject();
+	}
+	
+	$response = $app->response();
+  $response['Content-Type'] = 'application/json';
+  $response->status(200);
+  $response->body(json_encode($result));
+});
 
-$eventsAPI = new Events();
-$server = Server::create('/events', $eventsAPI)
-  ->setDebugMode(true)
-  ->setHttpStatusCodes(true)
-  ->addPostRoute("", 'createEvent')
-  ->addGetRoute('', 'listEvents')
-  ->addGetRoute('([0-9]{1,})', 'findEvent')
-  ->addPutRoute('([0-9]{1,})', 'updateEvent')
-  ->addDeleteRoute('([0-9]{1,})', 'deleteEvent');
-$eventsAPI->setServer($server);
+/**
+ * Find an event
+ */
+$app->get('/events/:id', function ($id) use ($app) {
+	$event_data = getEventData($id);
+	$event = $event_data != null ? Event::fromEventData($event_data)->toObject() : null;
+		
+	if ($event) {
+		$response = $app->response();
+	  $response['Content-Type'] = 'application/json';
+	  $response->status(200);
+	  $response->body(json_encode($event));
+	} else {
+  	$app->status(404);
+	  $response->body("Not Found");
+	}
+	
+})->name('id')->conditions(array('id' => '[0-9]{1,}'));
 
-$client = new APIClient($server);
-$client->setFormat("plain-json");
-$client->addOutputFormat("plain-json", "asPlainJSON");
-$server->setClient($client);
+/**
+ * Update an event
+ */
+$app->put('/events/:id', function ($id) use ($app) {
+	$response->status(501);
+})->name('id')->conditions(array('id' => '[0-9]{1,}'));
 
-$server->run();
+/**
+ * Delete an event
+ */
+$app->delete('/events/:id', function ($id) use ($app) {
+	$response->status(501);
+})->name('id')->conditions(array('id' => '[0-9]{1,}'));
+
+$app->run();
     
 ?>
