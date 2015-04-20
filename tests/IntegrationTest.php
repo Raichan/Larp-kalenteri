@@ -159,6 +159,30 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
 	
 		$this->fail("$recipient was not a recipient of email " . $email->id);
 	}
+	
+	protected function createOAuthClient($name, $client_id, $client_secret) {
+		$dbconn = $this->getDatabaseConnection();
+		
+		$result = pg_query_params(
+		  "insert into oauth_clients 
+			   (name, client_id, client_secret)
+		   values ($1, $2, $3)",
+				array($name, $client_id, $client_secret)
+		)  or die('Query failed: ' . pg_last_error());		
+				
+		pg_close($dbconn);
+	}
+	
+	protected function deleteOAuthClient($client_id) {
+		$dbconn = $this->getDatabaseConnection();
+
+		pg_query_params("delete from oauth_access_tokens where session_id = (select id from oauth_sessions where client_id = (select id from oauth_clients where client_id = $1))", array($client_id)) or die('Query failed: ' . pg_last_error());
+		pg_query_params("delete from oauth_sessions where client_id = (select id from oauth_clients where client_id = $1)", array($client_id)) or die('Query failed: ' . pg_last_error());
+		pg_query_params("delete from oauth_clients where client_id = $1", array($client_id)) or die('Query failed: ' . pg_last_error());
+		
+		pg_close($dbconn);
+	}
+	
 }
 
 
