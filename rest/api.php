@@ -1,5 +1,6 @@
 <?php
 
+use League\OAuth2\Server\Exception\InvalidClientException;
 require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../dat/controller.php';
 require_once __DIR__ . '/model.php';
@@ -32,6 +33,11 @@ function authenticate($resource_server) {
 			$headers = getallheaders();
 			$token = isset($headers['Authorization']) ? trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $headers['Authorization'])) : null;
 			$resource_server->isValidRequest(true, $token);
+		} catch (\League\OAuth2\Server\Exception\AccessDeniedException $e) {
+			$app = \Slim\Slim::getInstance();
+			$app->status(403);
+			$response = $app->response()->body($e->getMessage());
+			$app->stop();
 		} catch (\League\OAuth2\Server\Exception\InvalidRequestException $e) {
 			$app = \Slim\Slim::getInstance();
 			$app->status(403);
@@ -137,9 +143,16 @@ $app->post('/oauth2/token', function () use ($app, $oauth_server) {
 		$response->headers->set('Content-Type', 'application/json');
 		$response->headers->set('Cache-Control', 'no-store');
 		$response->headers->set('Pragma', 'no-store');
+	} catch (InvalidClientException $e) {
+	  $app = \Slim\Slim::getInstance();
+		$app->status(401);
+		$app->response()->body("Unauthorized");
+		$app->stop();
 	} catch (\Exception $e) {
-		$response->body($e->getMessage());
-		$response->body($e->getTraceAsString());
+		$app = \Slim\Slim::getInstance();
+		$app->status(500);
+		$app->response()->body($e->getMessage());
+		$app->stop();
 	}
 
 });
