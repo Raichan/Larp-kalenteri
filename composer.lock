@@ -469,20 +469,20 @@
         },
         {
             "name": "twig/twig",
-            "version": "v1.18.0",
+            "version": "v1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "4cf7464348e7f9893a93f7096a90b73722be99cf"
+                "reference": "9f70492f44398e276d1b81c1b43adfe6751c7b7f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/4cf7464348e7f9893a93f7096a90b73722be99cf",
-                "reference": "4cf7464348e7f9893a93f7096a90b73722be99cf",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/9f70492f44398e276d1b81c1b43adfe6751c7b7f",
+                "reference": "9f70492f44398e276d1b81c1b43adfe6751c7b7f",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.2.4"
+                "php": ">=5.2.7"
             },
             "type": "library",
             "extra": {
@@ -522,7 +522,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2015-01-25 17:32:08"
+            "time": "2015-04-19 08:30:27"
         }
     ],
     "packages-dev": [
@@ -620,49 +620,6 @@
                 "webdriver"
             ],
             "time": "2015-02-09 19:39:34"
-        },
-        {
-            "name": "marcj/php-rest-service",
-            "version": "0.1.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/marcj/php-rest-service.git",
-                "reference": "38848264ee5c6dbb61291ead257ddd03b4b9cdb1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/marcj/php-rest-service/zipball/38848264ee5c6dbb61291ead257ddd03b4b9cdb1",
-                "reference": "38848264ee5c6dbb61291ead257ddd03b4b9cdb1",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "RestService": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Marc J. Schmidt",
-                    "email": "marc@kryn.org",
-                    "homepage": "http://marcjschmidt.de"
-                }
-            ],
-            "description": "PHPRestService is a simple and fast PHP class for server side RESTful APIs.",
-            "keywords": [
-                "api",
-                "php",
-                "rest",
-                "restful"
-            ],
-            "time": "2013-12-06 02:32:09"
         },
         {
             "name": "phpdocumentor/reflection-docblock",
