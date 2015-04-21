@@ -8,20 +8,20 @@ require_once __DIR__ . '/oauth2.php';
 $app = new \Slim\Slim();
 
 $session_storage = new SessionStorage();
-$accesstoken_storage = new AccessTokenStorage();
+$access_token_storage = new AccessTokenStorage();
 $client_storage = new ClientStorage();
 $scope_storage = new ScopeStorage();
 
 $oauth_server = new \League\OAuth2\Server\AuthorizationServer;
 $oauth_server->setSessionStorage($session_storage);
-$oauth_server->setAccessTokenStorage($accesstoken_storage);
+$oauth_server->setAccessTokenStorage($access_token_storage);
 $oauth_server->setClientStorage($client_storage);
 $oauth_server->setScopeStorage($scope_storage);
 $oauth_server->addGrantType(new \League\OAuth2\Server\Grant\ClientCredentialsGrant());
 
 $resource_server = new \League\OAuth2\Server\ResourceServer(
 	$session_storage,
-	$accesstoken_storage,
+	$access_token_storage,
 	$client_storage,
   $scope_storage
 );
@@ -29,8 +29,15 @@ $resource_server = new \League\OAuth2\Server\ResourceServer(
 function authenticate($resource_server) {
 	return function () use ( $resource_server ) {
 		try {
-  		$resource_server->isValidRequest(false);
-  	} catch (\League\OAuth2\Server\Exception\OAuthException $e) {
+			$headers = getallheaders();
+			$token = isset($headers['Authorization']) ? trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $headers['Authorization'])) : null;
+			$resource_server->isValidRequest(true, $token);
+		} catch (\League\OAuth2\Server\Exception\InvalidRequestException $e) {
+			$app = \Slim\Slim::getInstance();
+			$app->status(403);
+			$response = $app->response()->body($e->getMessage());
+			$app->stop();
+		} catch (\League\OAuth2\Server\Exception\OAuthException $e) {
   		$app = \Slim\Slim::getInstance();
   		$app->status($e->errorType);
   		$response = $app->response()->body($e->getMessage());
@@ -119,7 +126,7 @@ $app->delete('/events/:id', authenticate($resource_server), function ($id) use (
 /**
  * Access token
  */
-$app->post('/access_token', function () use ($app, $oauth_server) {
+$app->post('/oauth2/token', function () use ($app, $oauth_server) {
 	$response = $app->response();
 	
 	try {
