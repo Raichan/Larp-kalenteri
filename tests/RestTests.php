@@ -24,7 +24,7 @@ class RestTests extends IntegrationTest {
 	  ]);
 	  	
 	  $response = $client
-	    ->post('/rest/api.php/access_token', [
+	    ->post('/rest/api.php/oauth2/token', [
 	  	  'body' => [
 	  	    "grant_type" => "client_credentials",
 	  	    "client_id" => "itest-client-id",
@@ -48,14 +48,13 @@ class RestTests extends IntegrationTest {
   	]);
   	 
   	try {
-  		$client->post('/rest/api.php/access_token', [
+  		$response = $client->post('/rest/api.php/oauth2/token', [
   				'body' => [
   						"grant_type" => "client_credentials",
   						"client_id" => "itest-client-id-invalid",
   						"client_secret" => "itest-client-secret"
   				]
   		]);
-  
   		$this->fail("Access token obtained with invalid credentials");
   	} catch (RequestException $e) {
   		$this->assertEquals(401, $e->getResponse()->getStatusCode());
@@ -68,7 +67,7 @@ class RestTests extends IntegrationTest {
   	]);
   	 
   	try {
-  		$client->post('/rest/api.php/access_token', [
+  		$client->post('/rest/api.php/oauth2/token', [
   				'body' => [
   						"grant_type" => "client_credentials",
   						"client_id" => "itest-client-id",
@@ -98,7 +97,9 @@ class RestTests extends IntegrationTest {
   public function testListEventsInvalidToken() {
   	$client = new GuzzleHttp\Client([
   	  'base_url' => $this->base_url,
-  		'headers' => ['access_token' => 'Foo Bar']
+  		'defaults' => [
+  		  'headers' => ['Authorization' => 'Bearer Foo Bar']
+  		]
   	]);
   	
   	try {
