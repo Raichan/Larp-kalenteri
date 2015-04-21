@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../dat/connectDB.php';
+require __DIR__ . '/../vendor/autoload.php';
+
 use League\OAuth2\Server\AbstractServer;
 use League\OAuth2\Server\Storage\ClientInterface;
 use League\OAuth2\Server\Entity\ClientEntity;
@@ -10,10 +13,8 @@ use League\OAuth2\Server\Entity\AccessTokenEntity;
 use League\OAuth2\Server\Entity\AuthCodeEntity;
 use League\OAuth2\Server\Entity\ScopeEntity;
 use League\OAuth2\Server\Storage\AccessTokenInterface;
-use League\OAuth2\Server\Storage\AbstractStorage;
 use League\OAuth2\Server\Storage\ScopeInterface;
-
-require_once __DIR__ . '/../dat/connectDB.php';
+use League\OAuth2\Server\Storage\AbstractStorage;
 
 class ClientStorage extends AbstractStorage implements ClientInterface {
 	
