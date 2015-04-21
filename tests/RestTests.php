@@ -134,6 +134,33 @@ class RestTests extends IntegrationTest {
 	  $this->assertEquals("Second", $events[1]['name']);
 	  $this->assertEquals("PENDING", $events[1]['status']);
   }
+
+  public function testListEventsByStatus() {
+  	$this->createEvent("First", "4",
+  			$this->getTimestamp(2015, 1, 1), $this->getTimestamp(2015, 1, 2),
+  			null, null, null, "3", "Example", null, null, null, null, false,
+  			false, false, false, null, "info", null, "organizer@example.com",
+  			null, null, "ACTIVE", "password", null, false);
+  	 
+  	$this->createEvent("Second", "5",
+  			$this->getTimestamp(2015, 2, 1), $this->getTimestamp(2015, 2, 2),
+  			null, null, null, "4", "Demo", null, null, null, null, false,
+  			false, false, false, null, "info two", null, "organizer@example.com",
+  			null, null, "PENDING", "secret", null, false);
+  
+  	$client = $this->createAuthorizedClient();
+  	 
+  	$response = $client->get('/rest/api.php/events', [
+  	  "query" => [ "status" => "PENDING" ]		
+  	]);
+  	
+  	$this->assertEquals(200, $response->getStatusCode());
+  	$this->assertNotNull($response->json());
+  	$events = $response->json();
+  	$this->assertEquals(1, sizeof($events));
+  	$this->assertEquals("Second", $events[0]['name']);
+  	$this->assertEquals("PENDING", $events[0]['status']);
+  }
   
   private function createAuthorizedClient() {
   	$handler = new GuzzleHttp\Ring\Client\StreamHandler();
