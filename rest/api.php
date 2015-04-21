@@ -71,8 +71,9 @@ $app->post('/events/', authenticate($resource_server), function () use ($app) {
  * List events
  */
 $app->get('/events/', authenticate($resource_server), function () use ($app) {
-	$result = [];
+	$status = $app->request()->params('status');
 		
+	$result = [];
 	$event_ids = null;
 	if (isset($status)) {
 		$event_ids = getEventIdsByStatus($status);
