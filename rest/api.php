@@ -103,9 +103,9 @@ $app->get('/events/', authenticate($resource_server), function () use ($app) {
 $app->get('/events/:id', authenticate($resource_server), function ($id) use ($app) {
 	$event_data = getEventData($id);
 	$event = $event_data != null ? Event::fromEventData($event_data)->toObject() : null;
-		
+	$response = $app->response();
+	
 	if ($event) {
-		$response = $app->response();
 	  $response['Content-Type'] = 'application/json';
 	  $response->status(200);
 	  $response->body(json_encode($event));
@@ -113,7 +113,6 @@ $app->get('/events/:id', authenticate($resource_server), function ($id) use ($ap
   	$app->status(404);
 	  $response->body("Not Found");
 	}
-	
 })->name('id')->conditions(array('id' => '[0-9]{1,}'));
 
 /**
