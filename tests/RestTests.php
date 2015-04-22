@@ -82,32 +82,11 @@ class RestTests extends IntegrationTest {
   }
   
   public function testListEventsNoToken() {
-  	$client = new GuzzleHttp\Client([
-  	  'base_url' => $this->base_url
-  	]);
-  	
-  	try {
-      $response = $client->get('/rest/api.php/events');
-      $this->fail("Accessed events list without a access token");
-  	} catch (RequestException $e) {
-  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
-  	}
+  	$this->assertUrlInaccessibleWithoutToken('/rest/api.php/events');
   }
   
   public function testListEventsInvalidToken() {
-  	$client = new GuzzleHttp\Client([
-  	  'base_url' => $this->base_url,
-  		'defaults' => [
-  		  'headers' => ['Authorization' => 'Bearer Foo Bar']
-  		]
-  	]);
-  	
-  	try {
-      $response = $client->get('/rest/api.php/events');
-      $this->fail("Accessed events list without a access token");
-  	} catch (RequestException $e) {
-  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
-  	}
+  	$this->assertUrlInaccessibleWithInvalidToken('/rest/api.php/events');
   }
   
   public function testListEvents() {
@@ -163,6 +142,39 @@ class RestTests extends IntegrationTest {
   	$this->assertEquals("PENDING", $events[0]['status']);
   }
   
+  public function testGetEventNoToken() {
+  	$this->assertUrlInaccessibleWithoutToken('/rest/api.php/events/123');
+  }
+  
+  public function testGetEventInvalidToken() {
+  	$this->assertUrlInaccessibleWithInvalidToken('/rest/api.php/events/123');
+  }
+  
+  public function testGetEventNotFound() {
+    $client = $this->createAuthorizedClient();
+  	$this->assertUrlNotFound($client, '/rest/api.php/events/123');
+  	$this->assertUrlNotFound($client, '/rest/api.php/events/abc');
+  	$this->assertUrlNotFound($client, '/rest/api.php/events/!');
+  }
+  
+  public function testGetEvent() {
+  	$id = $this->createEvent("First", "4",
+  			$this->getTimestamp(2015, 1, 1), $this->getTimestamp(2015, 1, 2),
+  			null, null, null, "3", "Example", null, null, null, null, false,
+  			false, false, false, null, "info", null, "organizer@example.com",
+  			null, null, "ACTIVE", "password", null, false);
+  	
+  	$client = $this->createAuthorizedClient();
+  	 
+  	$response = $client->get('/rest/api.php/events/' . $id);
+  	
+  	$this->assertEquals(200, $response->getStatusCode());
+  	$this->assertNotNull($response->json());
+  	$events = $response->json();
+  	$this->assertEquals("First", $events['name']);
+  	$this->assertEquals("ACTIVE", $events['status']);
+  }
+  
   private function createAuthorizedClient() {
   	$handler = new GuzzleHttp\Ring\Client\StreamHandler();
   	
@@ -188,6 +200,43 @@ class RestTests extends IntegrationTest {
   			'subscribers' => [$oauth2]
   		]
   	]);
+  }
+  
+  private function assertUrlNotFound($client, $url) {
+  	try {
+    	$response = $client->get($url);
+  	} catch (ClientException $e) {
+  	  $this->assertEquals(404, $e->getResponse()->getStatusCode());
+  	}
+  }
+
+  private function assertUrlInaccessibleWithoutToken($url) {
+  	$client = new GuzzleHttp\Client([
+  			'base_url' => $this->base_url
+  	]);
+  
+  	try {
+  		$response = $client->get($url);
+  		$this->fail("Accessed $url without an access token");
+  	} catch (RequestException $e) {
+  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
+  	}
+  }
+  
+  private function assertUrlInaccessibleWithInvalidToken($url) {
+  	$client = new GuzzleHttp\Client([
+  			'base_url' => $this->base_url,
+  			'defaults' => [
+  					'headers' => ['Authorization' => 'Bearer Foo Bar']
+  			]
+  	]);
+  
+  	try {
+  		$response = $client->get($url);
+  		$this->fail("Accessed $url with an invalid access token");
+  	} catch (RequestException $e) {
+  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
+  	}
   }
   
 }

@@ -44,13 +44,16 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
 			   locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
 				 invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
 				 link1, link2, status, password, illusionId, fniUserCreated)
-		   values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)",
+		   values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) returning id",
 				array($name, $type, $start, $end, $dateText, $signUpStart, $signUpEnd, $locationDropDown, $location, $iconUrl, $genre, $cost, 
 					$ageLimit, $beginnerFriendly ? "true" : "false", $eventFull ? "true" : "false", $invitationOnly ? "true" : "false", $languageFree ? "true" : "false", 
 					$storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $illusionId, $fniUserCreated ? "true" : "false")
 		)  or die('Query failed: ' . pg_last_error());		
 				
 		pg_close($dbconn);
+		
+		$row = pg_fetch_assoc($result);
+		return intval($row['id']);
 	}
 	
 	protected function findEventIdByPasswordAndStatus($password, $status) {
