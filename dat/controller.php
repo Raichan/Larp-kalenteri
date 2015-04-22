@@ -252,6 +252,17 @@ function createEvent($eventName, $eventType, $startDate, $endDate, $dateTextFiel
 	return null;
 }
 
+function updateEvent($eventId, $eventName, $eventType, $startDate, $endDate, $dateTextField, $startSignupTime, $endSignupTime, $locationDropDown, $locationTextField, $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly, $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull, $invitationOnly, $languageFree) {
+	$result = dbQueryP(
+	"update events
+	   set eventName = $1, eventType = $2, startDate = $3, endDate = $4, dateTextField = $5, startSignupTime = $6, endSignupTime = $7, locationDropDown = $8, locationTextField = $9, iconUrl = $10, genre = $11, cost = $12, ageLimit = $13, beginnerFriendly = $14, storyDescription = $15, infoDescription = $16, organizerName = $17, organizerEmail = $18, link1 = $19, link2 = $20, status = $21, password = $22, eventFull = $23, invitationOnly = $24, languageFree = $25
+	 where
+		 id = $26",
+			[$eventName, $eventType, dateToStr($startDate), dateToStr($endDate), $dateTextField, dateToStr($startSignupTime), dateToStr($endSignupTime), $locationDropDown, $locationTextField, $iconUrl, join(',', $genre), $cost, $ageLimit, $beginnerFriendly ? 't' : 'f', $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull ? 't' : 'f', $invitationOnly ? 't' : 'f', $languageFree ? 't' : 'f', $eventId]);
+	
+	return !!$result;
+}
+
 function getEventData($id) {
 	require_once (__DIR__ . '/connectDB.php');
 	

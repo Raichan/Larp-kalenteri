@@ -175,7 +175,70 @@ $app->get('/events/:id', authenticate($resource_server), function ($id) use ($ap
  * Update an event
  */
 $app->put('/events/:id', authenticate($resource_server), function ($id) use ($app) {
-	$response->status(501);
+	$response = $app->response();
+	
+	$event_data = getEventData($id);
+	if ($event_data == null) {
+		$app->status(404);
+		$response->body("Not Found");
+	} else {
+		$body = $app->request()->getBody();
+		if (!$body) {
+			$app->status(400);
+			$response->body("Missing payload");
+			return;
+		}
+	
+		$event = Event::fromJSON($body);
+		if (!$event) {
+			$app->status(400);
+			$response->body("Invalid payload");
+			return;
+		}
+	
+		$updated = updateEvent(
+				$id,
+				$event->getName(), 
+				$event->getType(), 
+				$event->getStart(), 
+				$event->getEnd(),
+				$event->getTextDate(),
+				$event->getSignUpStart(),
+				$event->getSignUpEnd(),
+				$event->getLocationDropDown(),
+				$event->getLocation(),
+				$event->getIconURL(),
+				$event->getGenres(),
+				$event->getCost(),
+				$event->getAgeLimit(),
+				$event->getBeginnerFriendly(),
+				$event->getStoryDescription(),
+				$event->getInfoDescription(),
+				$event->getOrganizerName(),
+				$event->getOrganizerEmail(),
+				$event->getLink1(),
+				$event->getLink2(),
+				$event->getStatus(),
+				$event->getPassword(),
+				$event->getEventFull(),
+				$event->getInvitationOnly(),
+				$event->getLanguageFree());
+		
+		if ($updated) {
+			$event_data = getEventData($id);
+			$event = $event_data != null ? Event::fromEventData($event_data)->toObject() : null;
+			
+			if ($event) {
+				$response['Content-Type'] = 'application/json';
+				$response->status(200);
+				$response->body(json_encode($event));
+			  return;
+			}
+		}
+		
+		$app->status(500);
+		$response->body("Internal Error");
+	}
 })->name('id')->conditions(array('id' => '[0-9]{1,}'));
 
 /**
