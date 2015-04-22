@@ -182,7 +182,16 @@ $app->put('/events/:id', authenticate($resource_server), function ($id) use ($ap
  * Delete an event
  */
 $app->delete('/events/:id', authenticate($resource_server), function ($id) use ($app) {
-	$response->status(501);
+	$response = $app->response();
+	
+	$event_data = getEventData($id);
+	if ($event_data == null) {
+		$app->status(404);
+		$response->body("Not Found");
+	} else {
+  	deleteEvent($id);
+  	$app->status(204);
+	}
 })->name('id')->conditions(array('id' => '[0-9]{1,}'));
 
 /**
