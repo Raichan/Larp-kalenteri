@@ -10,6 +10,7 @@ class Event {
 	private $textDate;
 	private $signUpStart;
 	private $signUpEnd;
+	private $locationDropDown;
 	private $location;
 	private $iconURL;
 	private $genres;
@@ -35,10 +36,39 @@ class Event {
 	
 	public function parseJSON($json) {
 		$assoc = json_decode($json, true);
+		if (!$assoc) {
+			return false;
+		}
 		
-		foreach ($assoc AS $key => $value) {
-			$this->{$key} = $value;
-		};
+		$this->id = $assoc['id'];
+		$this->name = $assoc['name'];
+		$this->type = $assoc['type'];
+		$this->start = Event::fromISODate($assoc['start']);
+		$this->end = Event::fromISODate($assoc['end']);
+		$this->textDate = $assoc['textDate'];
+		$this->signUpStart = Event::fromISODate($assoc['signUpStart']);
+		$this->signUpEnd = Event::fromISODate($assoc['signUpEnd']);
+		$this->locationDropDown = $assoc['locationDropDown'];
+		$this->location = $assoc['location'];
+		$this->iconURL = $assoc['iconURL'];
+		$this->genres = $assoc['genres'];
+		$this->cost = $assoc['cost'];
+		$this->ageLimit = $assoc['ageLimit'];
+		$this->beginnerFriendly = $assoc['beginnerFriendly'];
+		$this->storyDescription = $assoc['storyDescription'];
+		$this->infoDescription = $assoc['infoDescription'];
+		$this->organizerName = $assoc['organizerName'];
+		$this->organizerEmail = $assoc['organizerEmail'];
+		$this->link1 = $assoc['link1'];
+		$this->link2 = $assoc['link2'];
+		$this->status = $assoc['status'];
+		$this->password = $assoc['password'];
+		$this->eventFull = $assoc['eventFull'];
+		$this->invitationOnly = $assoc['invitationOnly'];
+		$this->languageFree = $assoc['languageFree'];
+		$this->illusionId = $assoc['illusionId'];
+		
+		return true;
 	}
 	
 	public function getId() {
@@ -111,6 +141,14 @@ class Event {
 	
 	private function setLocation($location) {
 		$this->location = $location;
+	}
+	
+	public function getLocationDropDown() {
+		return $this->locationDropDown;
+	}
+	
+	private function setLocationDropDown($locationDropDown) {
+		$this->locationDropDown = $locationDropDown;
 	}
 	
 	public function getIconURL() {
@@ -258,12 +296,13 @@ class Event {
 		$event->setId($event_data['id']);
 		$event->setName($event_data['name']);
 		$event->setType($event_data['type']);
-		$event->setStart($event_data['start']);
-		$event->setEnd($event_data['end']);
+		$event->setStart(Event::toISODate($event_data['start']));
+		$event->setEnd(Event::toISODate($event_data['end']));
 		$event->setTextDate($event_data['textDate']);
-		$event->setSignUpStart($event_data['signUpStart']);
-		$event->setSignUpEnd($event_data['signUpEnd']);
+		$event->setSignUpStart(Event::toISODate($event_data['signUpStart']));
+		$event->setSignUpEnd(Event::toISODate($event_data['signUpEnd']));
 		$event->setLocation($event_data['location']);
+		$event->setLocationDropDown($event_data['locationDropDown']);
 		$event->setIconURL($event_data['iconURL']);
 		$event->setGenres($event_data['genres']);
 		$event->setCost($event_data['cost']);
@@ -287,9 +326,24 @@ class Event {
 	
 	public static function fromJSON($json) {
 		$event = new Event();
-		$event->parseJSON($json);
-		return $event;	
+		if ($event->parseJSON($json)) {
+	  	return $event;	
+		}
+		
+		return null;
   }
+	
+	private static function toISODate($date) {
+		return $date ? $date->format('c') : null;
+	}
+	
+	private static function fromISODate($str) {
+		if (!$str) {
+			return null;
+		}
+		
+		return DateTime::createFromFormat(DateTime::ISO8601, $str);
+	}
 	
 }
 

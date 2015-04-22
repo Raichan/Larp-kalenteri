@@ -70,7 +70,63 @@ $app->get('/ping', function () use ($app) {
  * Create event
  */
 $app->post('/events/', authenticate($resource_server), function () use ($app) {
-	$response->status(501);
+	$response = $app->response();
+	
+	$body = $app->request()->getBody();
+	if (!$body) {
+		$app->status(400);
+		$response->body("Missing payload");
+		return;
+	}
+
+	$event = Event::fromJSON($body);
+	if (!$event) {
+		$app->status(400);
+		$response->body("Invalid payload");
+		return;
+	}
+	
+	$event_id = createEvent(
+			$event->getName(), 
+			$event->getType(), 
+			$event->getStart(), 
+			$event->getEnd(),
+			$event->getTextDate(),
+			$event->getSignUpStart(),
+			$event->getSignUpEnd(),
+			$event->getLocationDropDown(),
+			$event->getLocation(),
+			$event->getIconURL(),
+			$event->getGenres(),
+			$event->getCost(),
+			$event->getAgeLimit(),
+			$event->getBeginnerFriendly(),
+			$event->getStoryDescription(),
+			$event->getInfoDescription(),
+			$event->getOrganizerName(),
+			$event->getOrganizerEmail(),
+			$event->getLink1(),
+			$event->getLink2(),
+			$event->getStatus(),
+			$event->getPassword(),
+			$event->getEventFull(),
+			$event->getInvitationOnly(),
+			$event->getLanguageFree());
+	
+	if ($event_id) {
+		$event_data = getEventData($event_id);
+		$event = $event_data != null ? Event::fromEventData($event_data)->toObject() : null;
+		
+		if ($event) {
+			$response['Content-Type'] = 'application/json';
+			$response->status(200);
+			$response->body(json_encode($event));
+		  return;
+		}
+	}
+	
+	$app->status(500);
+	$response->body("Internal Error");
 });
 
 /**

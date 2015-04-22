@@ -200,6 +200,14 @@ function strToDate($str) {
 	->setTime(0, 0, 0);
 }
 
+function dateToStr($date) {
+	if ($date == null) {
+		return null;
+	}
+
+	return $date->getTimestamp();
+}
+
 function getEventIds() {
 	require_once (__DIR__ . '/connectDB.php');
 	
@@ -228,13 +236,29 @@ function getEventIdsByStatus($status) {
 	return $ids;
 }
 
+function createEvent($eventName, $eventType, $startDate, $endDate, $dateTextField, $startSignupTime, $endSignupTime, $locationDropDown, $locationTextField, $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly, $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull, $invitationOnly, $languageFree) {
+	$result = dbQueryP("insert into
+	  events (eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree)
+	values 
+	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25) returning id", 
+			[$eventName, $eventType, dateToStr($startDate), dateToStr($endDate), $dateTextField, dateToStr($startSignupTime), dateToStr($endSignupTime), $locationDropDown, $locationTextField, $iconUrl, join(',', $genre), $cost, $ageLimit, $beginnerFriendly ? 't' : 'f', $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull ? 't' : 'f', $invitationOnly ? 't' : 'f', $languageFree ? 't' : 'f']);
+	if ($result) {
+  	$row = pg_fetch_assoc($result);
+  	if ($row) {
+	    return intval($row['id']);
+  	}
+	} 
+	
+	return null;
+}
+
 function getEventData($id) {
 	require_once (__DIR__ . '/connectDB.php');
 	
 	$result = dbQueryP(
 			"select
 			  id, eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime,
-			  locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
+			  locationdropdown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
 				invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
 				link1, link2, status, password, illusionId
 			from
@@ -258,6 +282,7 @@ function getEventData($id) {
 			'signUpStart' => strToDate($row['startsignuptime']),
 			'signUpEnd' => strToDate($row['endsignuptime']),
 			'location' => $row['locationtextfield'],
+			'locationDropDown' => $row['locationdropdown'],	
 			'iconURL' => $row['iconurl'],
 			'genres' => $row['genre'] ? explode(",", $row['genre']) : [],
 			'cost' => $row['cost'],
