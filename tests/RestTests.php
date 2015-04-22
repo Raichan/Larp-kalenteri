@@ -260,6 +260,47 @@ class RestTests extends IntegrationTest {
   	$this->assertEquals(1, sizeof($events));
   	$this->assertEquals("Second", $events[0]['name']);
   }
+
+  public function testUpdateEventNoToken() {
+  	$this->assertPutForbiddenInvalidToken('/rest/api.php/events/123');
+  }
+  
+  public function testUpdateEventInvalidToken() {
+  	$this->assertPutForbiddenInvalidToken('/rest/api.php/events/123');
+  }
+  
+  public function testUpdateEventNotFound() {
+    $client = $this->createAuthorizedClient();
+  	$this->assertPutNotFound($client, '/rest/api.php/events/123');
+  	$this->assertPutNotFound($client, '/rest/api.php/events/abc');
+  	$this->assertPutNotFound($client, '/rest/api.php/events/!');
+  }
+  
+  public function testUpdateEvent() {
+  	$id = $this->createEvent("Original", "4",
+  			$this->getTimestamp(2015, 1, 1), $this->getTimestamp(2015, 1, 2),
+  			null, null, null, "3", "Example", null, null, null, null, false,
+  			false, false, false, null, "info", null, "organizer@example.com",
+  			null, null, "ACTIVE", "password", null, false);
+  	
+  	$payload = json_decode('{"id":null,"name":"Updated","type":4,"start":"2015-01-01T00:00:00+00:00","end":"2015-01-02T00:00:00+00:00","textDate":null,"signUpStart":null,"signUpEnd":null,"locationDropDown":"3","location":"Example","iconURL":null,"genres":[],"cost":null,"ageLimit":null,"beginnerFriendly":false,"storyDescription":null,"infoDescription":"info","organizerName":null,"organizerEmail":"organizer@example.com","link1":null,"link2":null,"status":"ACTIVE","password":"password","eventFull":false,"invitationOnly":false,"languageFree":false,"illusionId":null}');
+  	
+  	$client = $this->createAuthorizedClient();
+  	
+  	$this->assertEquals($client->get('/rest/api.php/events/' . $id)->json()['name'], "Original");
+  	 
+    $response = $client->put('/rest/api.php/events/' . $id, [
+      'json' => $payload
+    ]);
+  	
+    $this->assertEquals(200, $response->getStatusCode());
+	  $this->assertNotNull($response->json());
+	  $events = $response->json();
+	  $this->assertEquals("Updated", $events['name']);
+	  $this->assertEventName($id, "Updated");
+	  
+	  $this->assertEquals($client->get('/rest/api.php/events/' . $id)->json()['name'], "Updated");
+  }
   
   private function createAuthorizedClient() {
   	$handler = new GuzzleHttp\Ring\Client\StreamHandler();
@@ -386,6 +427,43 @@ class RestTests extends IntegrationTest {
   private function assertDeleteNotFound($client, $url) {
   	try {
     	$response = $client->delete($url);
+  	} catch (ClientException $e) {
+  	  $this->assertEquals(404, $e->getResponse()->getStatusCode());
+  	}
+  }
+
+  private function assertPutForbiddenWithoutToken($url) {
+  	$client = new GuzzleHttp\Client([
+  			'base_url' => $this->base_url
+  	]);
+  
+  	try {
+  		$response = $client->put($url);
+  		$this->fail("Accessed $url without an access token");
+  	} catch (RequestException $e) {
+  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
+  	}
+  }
+  
+  private function assertPutForbiddenInvalidToken($url) {
+  	$client = new GuzzleHttp\Client([
+  			'base_url' => $this->base_url,
+  			'defaults' => [
+  					'headers' => ['Authorization' => 'Bearer Foo Bar']
+  			]
+  	]);
+  
+  	try {
+  		$response = $client->put($url);
+  		$this->fail("Accessed $url with an invalid access token");
+  	} catch (RequestException $e) {
+  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
+  	}
+  }
+  
+  private function assertPutNotFound($client, $url) {
+  	try {
+    	$response = $client->put($url);
   	} catch (ClientException $e) {
   	  $this->assertEquals(404, $e->getResponse()->getStatusCode());
   	}
