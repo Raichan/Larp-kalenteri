@@ -89,6 +89,13 @@ class RestTests extends IntegrationTest {
   	$this->assertUrlInaccessibleWithInvalidToken('/rest/api.php/events');
   }
   
+  public function testPing() {
+  	$client = $this->createAuthorizedClient();
+  	$response = $client->get('/rest/api.php/ping');
+		$this->assertEquals(200, $response->getStatusCode());
+		$this->assertEquals("pong", $response->getBody());
+  }
+  
   public function testListEvents() {
   	$this->createEvent("First", "4",
   			$this->getTimestamp(2015, 1, 1), $this->getTimestamp(2015, 1, 2),
@@ -140,6 +147,8 @@ class RestTests extends IntegrationTest {
   	$this->assertEquals(1, sizeof($events));
   	$this->assertEquals("Second", $events[0]['name']);
   	$this->assertEquals("PENDING", $events[0]['status']);
+  	$this->assertEquals($this->getISODate(2015, 1, 1), $events[0]['start']);
+  	$this->assertEquals($this->getISODate(2015, 1, 2), $events[0]['end']);
   }
   
   public function testGetEventNoToken() {
@@ -173,6 +182,34 @@ class RestTests extends IntegrationTest {
   	$events = $response->json();
   	$this->assertEquals("First", $events['name']);
   	$this->assertEquals("ACTIVE", $events['status']);
+  	$this->assertEquals($this->getISODate(2015, 1, 1), $events['start']);
+  	$this->assertEquals($this->getISODate(2015, 1, 2), $events['end']);
+  }
+  
+  public function testCreateEventNoToken() {
+    $this->assertPostForbiddenWithoutToken('/rest/api.php/events');
+  }
+  
+  public function testCreateEventInvalidToken() {
+    $this->assertPostForbiddenInvalidToken('/rest/api.php/events');
+  }
+  
+  public function testCreateEvent() {
+  	$payload = json_decode('{"id":null,"name":"Create","type":4,"start":"2015-01-01T00:00:00+00:00","end":"2015-01-02T00:00:00+00:00","textDate":null,"signUpStart":null,"signUpEnd":null,"locationDropDown":"3","location":"Example","iconURL":null,"genres":[],"cost":null,"ageLimit":null,"beginnerFriendly":false,"storyDescription":null,"infoDescription":"info","organizerName":null,"organizerEmail":"organizer@example.com","link1":null,"link2":null,"status":"ACTIVE","password":"password","eventFull":false,"invitationOnly":false,"languageFree":false,"illusionId":null}');
+  	
+  	$client = $this->createAuthorizedClient();
+  	 
+    $response = $client->post('/rest/api.php/events/', [
+      'json' => $payload
+    ]);
+  	
+    $this->assertEquals(200, $response->getStatusCode());
+	  $this->assertNotNull($response->json());
+	  $events = $response->json();
+	  $this->assertEquals("Create", $events['name']);
+	  $this->assertEquals("ACTIVE", $events['status']);
+	  $this->assertEquals($this->getISODate(2015, 1, 1), $events['start']);
+	  $this->assertEquals($this->getISODate(2015, 1, 2), $events['end']);
   }
   
   private function createAuthorizedClient() {
@@ -233,6 +270,35 @@ class RestTests extends IntegrationTest {
   
   	try {
   		$response = $client->get($url);
+  		$this->fail("Accessed $url with an invalid access token");
+  	} catch (RequestException $e) {
+  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
+  	}
+  }
+
+  private function assertPostForbiddenWithoutToken($url) {
+  	$client = new GuzzleHttp\Client([
+  			'base_url' => $this->base_url
+  	]);
+  
+  	try {
+  		$response = $client->post($url);
+  		$this->fail("Accessed $url without an access token");
+  	} catch (RequestException $e) {
+  		$this->assertEquals(403, $e->getResponse()->getStatusCode());
+  	}
+  }
+  
+  private function assertPostForbiddenInvalidToken($url) {
+  	$client = new GuzzleHttp\Client([
+  			'base_url' => $this->base_url,
+  			'defaults' => [
+  					'headers' => ['Authorization' => 'Bearer Foo Bar']
+  			]
+  	]);
+  
+  	try {
+  		$response = $client->post($url);
   		$this->fail("Accessed $url with an invalid access token");
   	} catch (RequestException $e) {
   		$this->assertEquals(403, $e->getResponse()->getStatusCode());
