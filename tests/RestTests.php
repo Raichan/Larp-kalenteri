@@ -24,7 +24,7 @@ class RestTests extends IntegrationTest {
 	  ]);
 	  	
 	  $response = $client
-	    ->post('/rest/api.php/oauth2/token', [
+	    ->post('/oauth2/token', [
 	  	  'body' => [
 	  	    "grant_type" => "client_credentials",
 	  	    "client_id" => "itest-client-id",
@@ -48,7 +48,7 @@ class RestTests extends IntegrationTest {
   	]);
   	 
   	try {
-  		$response = $client->post('/rest/api.php/oauth2/token', [
+  		$response = $client->post('/oauth2/token', [
   				'body' => [
   						"grant_type" => "client_credentials",
   						"client_id" => "itest-client-id-invalid",
@@ -67,7 +67,7 @@ class RestTests extends IntegrationTest {
   	]);
   	 
   	try {
-  		$client->post('/rest/api.php/oauth2/token', [
+  		$client->post('/oauth2/token', [
   				'body' => [
   						"grant_type" => "client_credentials",
   						"client_id" => "itest-client-id",
@@ -82,16 +82,16 @@ class RestTests extends IntegrationTest {
   }
   
   public function testListEventsNoToken() {
-  	$this->assertUrlInaccessibleWithoutToken('/rest/api.php/events');
+  	$this->assertUrlInaccessibleWithoutToken('/rest/events');
   }
   
   public function testListEventsInvalidToken() {
-  	$this->assertUrlInaccessibleWithInvalidToken('/rest/api.php/events');
+  	$this->assertUrlInaccessibleWithInvalidToken('/rest/events');
   }
   
   public function testPing() {
   	$client = $this->createAuthorizedClient();
-  	$response = $client->get('/rest/api.php/ping');
+  	$response = $client->get('/rest/ping');
 		$this->assertEquals(200, $response->getStatusCode());
 		$this->assertEquals("pong", $response->getBody());
   }
@@ -111,7 +111,7 @@ class RestTests extends IntegrationTest {
   	 
   	$client = $this->createAuthorizedClient();
   	
-	  $response = $client->get('/rest/api.php/events');
+	  $response = $client->get('/rest/events');
     $this->assertEquals(200, $response->getStatusCode());
     $this->assertNotNull($response->json());
 	  $events = $response->json();
@@ -137,7 +137,7 @@ class RestTests extends IntegrationTest {
   
   	$client = $this->createAuthorizedClient();
   	 
-  	$response = $client->get('/rest/api.php/events', [
+  	$response = $client->get('/rest/events', [
   	  "query" => [ "status" => "PENDING" ]		
   	]);
   	
@@ -152,18 +152,18 @@ class RestTests extends IntegrationTest {
   }
   
   public function testGetEventNoToken() {
-  	$this->assertUrlInaccessibleWithoutToken('/rest/api.php/events/123');
+  	$this->assertUrlInaccessibleWithoutToken('/rest/events/123');
   }
   
   public function testGetEventInvalidToken() {
-  	$this->assertUrlInaccessibleWithInvalidToken('/rest/api.php/events/123');
+  	$this->assertUrlInaccessibleWithInvalidToken('/rest/events/123');
   }
   
   public function testGetEventNotFound() {
     $client = $this->createAuthorizedClient();
-  	$this->assertUrlNotFound($client, '/rest/api.php/events/123');
-  	$this->assertUrlNotFound($client, '/rest/api.php/events/abc');
-  	$this->assertUrlNotFound($client, '/rest/api.php/events/!');
+  	$this->assertUrlNotFound($client, '/rest/events/123');
+  	$this->assertUrlNotFound($client, '/rest/events/abc');
+  	$this->assertUrlNotFound($client, '/rest/events/!');
   }
   
   public function testGetEvent() {
@@ -175,7 +175,7 @@ class RestTests extends IntegrationTest {
   	
   	$client = $this->createAuthorizedClient();
   	 
-  	$response = $client->get('/rest/api.php/events/' . $id);
+  	$response = $client->get('/rest/events/' . $id);
   	
   	$this->assertEquals(200, $response->getStatusCode());
   	$this->assertNotNull($response->json());
@@ -187,11 +187,11 @@ class RestTests extends IntegrationTest {
   }
   
   public function testCreateEventNoToken() {
-    $this->assertPostForbiddenWithoutToken('/rest/api.php/events');
+    $this->assertPostForbiddenWithoutToken('/rest/events');
   }
   
   public function testCreateEventInvalidToken() {
-    $this->assertPostForbiddenInvalidToken('/rest/api.php/events');
+    $this->assertPostForbiddenInvalidToken('/rest/events');
   }
   
   public function testCreateEvent() {
@@ -199,7 +199,7 @@ class RestTests extends IntegrationTest {
   	
   	$client = $this->createAuthorizedClient();
   	 
-    $response = $client->post('/rest/api.php/events/', [
+    $response = $client->post('/rest/events/', [
       'json' => $payload
     ]);
   	
@@ -213,18 +213,18 @@ class RestTests extends IntegrationTest {
   }
 
   public function testDeleteEventNoToken() {
-  	$this->assertDeleteForbiddenInvalidToken('/rest/api.php/events/123');
+  	$this->assertDeleteForbiddenInvalidToken('/rest/events/123');
   }
   
   public function testDeleteEventInvalidToken() {
-  	$this->assertDeleteForbiddenInvalidToken('/rest/api.php/events/123');
+  	$this->assertDeleteForbiddenInvalidToken('/rest/events/123');
   }
   
   public function testDeleteEventNotFound() {
     $client = $this->createAuthorizedClient();
-  	$this->assertDeleteNotFound($client, '/rest/api.php/events/123');
-  	$this->assertDeleteNotFound($client, '/rest/api.php/events/abc');
-  	$this->assertDeleteNotFound($client, '/rest/api.php/events/!');
+  	$this->assertDeleteNotFound($client, '/rest/events/123');
+  	$this->assertDeleteNotFound($client, '/rest/events/abc');
+  	$this->assertDeleteNotFound($client, '/rest/events/!');
   }
   
   public function testDeleteEvent() {
@@ -242,7 +242,7 @@ class RestTests extends IntegrationTest {
   
   	$client = $this->createAuthorizedClient();
   	 
-  	$response = $client->get('/rest/api.php/events');
+  	$response = $client->get('/rest/events');
   	$this->assertEquals(200, $response->getStatusCode());
   	$this->assertNotNull($response->json());
   	$events = $response->json();
@@ -250,10 +250,10 @@ class RestTests extends IntegrationTest {
   	$this->assertEquals("First", $events[0]['name']);
   	$this->assertEquals("Second", $events[1]['name']);
   	
-  	$response = $client->delete('/rest/api.php/events/' . $events[0]['id']);
+  	$response = $client->delete('/rest/events/' . $events[0]['id']);
   	$this->assertEquals(204, $response->getStatusCode());
   	
-  	$response = $client->get('/rest/api.php/events');
+  	$response = $client->get('/rest/events');
   	$this->assertEquals(200, $response->getStatusCode());
   	$this->assertNotNull($response->json());
   	$events = $response->json();
@@ -262,18 +262,18 @@ class RestTests extends IntegrationTest {
   }
 
   public function testUpdateEventNoToken() {
-  	$this->assertPutForbiddenInvalidToken('/rest/api.php/events/123');
+  	$this->assertPutForbiddenInvalidToken('/rest/events/123');
   }
   
   public function testUpdateEventInvalidToken() {
-  	$this->assertPutForbiddenInvalidToken('/rest/api.php/events/123');
+  	$this->assertPutForbiddenInvalidToken('/rest/events/123');
   }
   
   public function testUpdateEventNotFound() {
     $client = $this->createAuthorizedClient();
-  	$this->assertPutNotFound($client, '/rest/api.php/events/123');
-  	$this->assertPutNotFound($client, '/rest/api.php/events/abc');
-  	$this->assertPutNotFound($client, '/rest/api.php/events/!');
+  	$this->assertPutNotFound($client, '/rest/events/123');
+  	$this->assertPutNotFound($client, '/rest/events/abc');
+  	$this->assertPutNotFound($client, '/rest/events/!');
   }
   
   public function testUpdateEvent() {
@@ -287,9 +287,9 @@ class RestTests extends IntegrationTest {
   	
   	$client = $this->createAuthorizedClient();
   	
-  	$this->assertEquals($client->get('/rest/api.php/events/' . $id)->json()['name'], "Original");
+  	$this->assertEquals($client->get('/rest/events/' . $id)->json()['name'], "Original");
   	 
-    $response = $client->put('/rest/api.php/events/' . $id, [
+    $response = $client->put('/rest/events/' . $id, [
       'json' => $payload
     ]);
   	
@@ -299,7 +299,7 @@ class RestTests extends IntegrationTest {
 	  $this->assertEquals("Updated", $events['name']);
 	  $this->assertEventName($id, "Updated");
 	  
-	  $this->assertEquals($client->get('/rest/api.php/events/' . $id)->json()['name'], "Updated");
+	  $this->assertEquals($client->get('/rest/events/' . $id)->json()['name'], "Updated");
   }
   
   private function createAuthorizedClient() {
@@ -307,7 +307,7 @@ class RestTests extends IntegrationTest {
   	
   	$oauth2Client = new GuzzleHttp\Client([
   		'handler' => $handler,
-  		'base_url' => "$this->base_url/rest/api.php/"
+  		'base_url' => "$this->base_url"
   	]);
   	
   	$config = [
