@@ -21,24 +21,55 @@ if (isset($_SESSION["valid"])) {
         }
     });
 
+    function disableFnISync(reason) {
+      $("#illusionsync").parent().find('span.illusion-error').remove()
+    
+      var dateRequiredText = $("#illusionsync").attr('data-' + reason);
+      $("#illusionsync")
+        .attr({
+          'title': dateRequiredText,
+          'disabled': 'disabled'
+        })
+        .parent()
+        .append($('<span>').addClass('illusion-error').text(dateRequiredText));
+    }
+
+    function enableFnISync() {
+      $("#illusionsync")
+        .removeAttr('title')
+        .removeAttr('disabled')
+        .parent().find('span.illusion-error').remove();
+    }
+
     function dateButtons() {
         if (document.getElementById("date_datepicker").checked) {
             document.getElementById("datestart").disabled = false;
             document.getElementById("dateend").disabled = false;
             document.getElementById("datetext").disabled = true;
+            enableFnISync();
         }
 
         else if (document.getElementById("date_text").checked) {
             document.getElementById("datestart").disabled = true;
             document.getElementById("dateend").disabled = true;
             document.getElementById("datetext").disabled = false;
+            disableFnISync('date-required');
         }
+
+
+        
     }
 
     function checkRadioButton(button) {
         document.getElementById(button).checked = true;
         dateButtons();
     }
+
+    $(document).ready(function () {
+      if (!$("#date_datepicker").prop('checked')) {
+        disableFnISync('date-required');
+      }
+    });
 </script>
 
 <div id="form_container">
@@ -133,7 +164,7 @@ if (isset($_SESSION["valid"])) {
             </span>
 			<br>
 			<span>
-                <input id="" name="eventfull" type="checkbox" value="1" <?php if ($eventfull == "t") echo( 'checked'); ?>/>
+                <input id="eventfull" name="eventfull" type="checkbox" value="1" <?php if ($eventfull == "t") echo( 'checked'); ?>/>
                 <label for="eventfull"><?php echo $label_eventfull; ?></label>
             </span>
 			<br>
@@ -160,6 +191,17 @@ if (isset($_SESSION["valid"])) {
             <input id="website1" name="website1" type="text" maxlength="100" value="<?php echo $website1; ?>"/><span class="error"><?php echo $web1Err; ?></span></p>
         <p><label for="website2"><?php echo $label_link2; ?></label><br>
             <input id="website2" name="website2" type="text" maxlength="100" value="<?php echo $website2; ?>"/><span class="error"><?php echo $web2Err; ?></span></p> 
+        
+        <p>
+          <span>
+            <input id="illusionsync" name="illusionsync" type="checkbox" value="1"<?php if ($illusionSync == true) echo ' checked="checked" : '?>data-date-required="<?php echo $daterequired_illusion ?>"/>
+            <label for="illusionsync"><?php echo $label_illusion; ?></label>
+          </span>
+          <p>
+            <small><?php echo $text_illusion; ?></small>
+          </p>
+        </p>
+            
         <input class="btn btn-primary" id="save" type="submit" name="submit" value="<?php echo $button_submit; ?>" />
     </form>	
 </div>

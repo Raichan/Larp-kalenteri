@@ -1,0 +1,38 @@
+language: php
+php:
+- 5.6
+script: phpunit --debug
+addons:
+  hosts:
+    - kalenteri.larp.dev
+  sauce_connect: true
+  postgresql: "9.3"
+env:
+  global:
+  - secure: ZtcET/V0ewOgWTAcmnFuAiGmJcarUF0CyU1vgf3zmW0xEMAkK6iBlNamAh7cfTZK7ZKLFvObCbSbxx8DlSo+yknJmjzMgveOcoNNdU/su46AdWYtRzIJIymxJYPDxobDJJHvktN3MwQP/1LHVnhSOzYaIhUusKfUobz95YvRZHc=
+  - secure: AIYs9kx9If7X631dfzYNses+51rLpYMUoXTiCCqu5NUj0ej79LkfETFEbOZ07puhh/zTMB1k2m7VXtPYinW4Yk8uEnZrFP2neunYRWRxgT7HlSfS5PK1G1wkbwkM3OiHYoMJNGy0YdFpaOJe5e4Xrzzn0kc5mxitFuenYsIuU6c=
+before_install:
+- cp ./tests/fni.config ./illusion/config.php
+- sudo -u postgres psql postgres -f ./tests/sql/database.sql
+- sudo sed -i 's/^local\s\+all\s\+all\s\+peer/local all all md5/g' /etc/postgresql/9.3/main/pg_hba.conf
+- export PGPASSWORD=larpfi
+- psql -U larpfi larpfi -f ./tests/sql/tables.sql
+- psql -U larpfi larpfi -f ./tests/sql/admins.sql
+- sudo apt-add-repository -y ppa:ondrej/apache2
+- sudo apt-add-repository -y ppa:ondrej/php5
+- sudo apt-get update
+- sudo apt-get install apache2 libapache2-mod-php5 php5-pgsql rubygems1.9.1 ruby1.9.1 ruby1.9.1-dev build-essential libsqlite3-dev
+- sudo gem install mailcatcher
+- sudo sed -i "s/^\\;sendmail_path.*$/sendmail_path = \/usr\/bin\/env catchmail/g" /etc/php5/apache2/php.ini
+- sudo cp -v ./tests/a2_virtualhost.conf /etc/apache2/sites-available/lk.conf
+- sudo a2ensite lk
+- sudo service apache2 restart
+- composer install
+- wget http://repo1.maven.org/maven2/com/github/tomakehurst/wiremock/1.54/wiremock-1.54-standalone.jar -O ~/wiremock-standalone.jar
+- java -jar ~/wiremock-standalone.jar --verbose --https-port 8443 --port 8080 --bind-address test.forgeandillusion.net --https-keystore ./tests/test.forgeandillusion.net.keystore > ~/wiremock.out &
+- sudo mailcatcher
+- sleep 3
+after_failure:
+- sudo cat /var/log/apache2/access.log
+- sudo cat /var/log/apache2/error.log
+- cat ~/wiremock.out

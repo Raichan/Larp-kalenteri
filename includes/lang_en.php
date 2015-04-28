@@ -116,6 +116,9 @@ $label_orgname = "Organizer name";
 $label_orgemail = "Organizer email *";
 $label_link1 = "Web site 1";
 $label_link2 = "Web site 2";
+$label_illusion = "Create Illusion event";
+$text_illusion = "Event will be created also into the Forge &amp; Illusionin event calendar (<a href=\"http://www.forgeandillusion.net/illusion/\">www.forgeandillusion.net/illusion</a>)";
+$daterequired_illusion = "Illusion events require dates. You can create the event afterwards by modifying the event";
 $button_submit = "Submit";
 
 // includes/eventInfo.php
@@ -188,8 +191,7 @@ $text_deletesuccess = "Your event was deleted successfully.";
 // includes/emails.php
 
 $admin_subject = 'Pending event in larp calendar';
-$admin_msg1 = 'An event ';
-$admin_msg2 = '
+$admin_msg = 'An event 
 	has been submitted or modified in the larp calendar
 	and requires your attention.
 	

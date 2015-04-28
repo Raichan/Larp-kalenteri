@@ -85,6 +85,8 @@ and open the template in the editor.
 							$organizeremail = $result['organizeremail'];
 							$website1 = $result['link1'];
 							$website2 = $result['link2'];
+							$illusionId = empty($result['illusionid']) ? null : intval($result['illusionid']);
+              $illusionSync = $illusionId != null;
 						}
 					}
 

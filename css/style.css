@@ -18,3 +18,13 @@ and open the template in the editor.
 .error {
 	color: red;
 }
+
+.illusion-error {
+  color: #a00;  
+  font-style: italic;
+  font-size: 90%;
+}
+
+.illusion-error:before {
+  content: ' - ';
+}

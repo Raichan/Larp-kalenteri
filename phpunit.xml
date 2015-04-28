@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit verbose="true">
+
+  <testsuites>
+    <testsuite name="AllTests">
+      <file>tests/AdminAcceptEventTests.php</file>
+      <file>tests/CreateEventTests.php</file>
+      <file>tests/ModifyEventTests.php</file>
+    </testsuite>
+  </testsuites>
+  
+</phpunit>

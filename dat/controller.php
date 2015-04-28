@@ -140,28 +140,136 @@ function getListOfEvents($month, $day, $year) {
     }
 }
 
+function getEventIdByPasswordAndStatus($password, $status) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$result = dbQueryP('select id from events where password = $1 and status = $2', [$password, $status]);
+	
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+  	return intval($row['id']);
+	}
+	
+	return null;
+}
+
+function getEventIllusionIdByEventId($id) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$result = dbQueryP('select illusionId from events where id = $1', [$id]);
+	
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+  	return intval($row['illusionid']);
+	}
+	
+	return null;
+}
+
+function updateEventIllusionId($eventId, $illusionEventId) {
+	require_once (__DIR__ . '/connectDB.php');
+	dbQueryP("update events set illusionId = $1 where id = $2", array($illusionEventId, $eventId));
+}
+
+function getEventFnIUserCreatedByEventId($id) {
+	require_once (__DIR__ . '/connectDB.php');
+
+	$result = dbQueryP('select fniusercreated from events where id = $1', [$id]);
+
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+		return $row['fniusercreated'] == "t";
+	}
+
+	return false;
+}
+
+function updateEventFnIUserCreated($eventId, $fniUserCreated) {
+	require_once (__DIR__ . '/connectDB.php');
+	dbQueryP("update events set fniUserCreated = $1 where id = $2", array($fniUserCreated ? 't' : 'f', $eventId));
+}
+
+function strToDate($str) {
+	if (empty($str)) {
+		return null;
+	}
+
+	return (new DateTime())
+	->setTimezone(new DateTimeZone("UTC"))
+	->setTimestamp(intval($str))
+	->setTime(0, 0, 0);
+}
+
+function getEventData($id) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$result = dbQueryP(
+			"select
+			  id, eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime,
+			  locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
+				invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
+				link1, link2, status, password, illusionId
+			from
+			  events
+			where
+			  id = $1",array($id));
+	
+	if ($result) {
+		$row = pg_fetch_assoc($result);
+		
+		return [
+		  'id' => intval($row['id']),
+			'name' => $row['eventname'],
+			'type' => intval($row['eventtype']),
+			'start' => strToDate($row['startdate']),
+			'end' => strToDate($row['enddate']),
+			'textDate' => $row['datetextfield'],			
+			'signUpStart' => strToDate($row['startsignuptime']),
+			'signUpEnd' => strToDate($row['endsignuptime']),
+			'location' => $row['locationtextfield'],
+			'iconURL' => $row['iconurl'],
+			'genres' => $row['genre'] ? explode(",", $row['genre']) : [],
+			'cost' => $row['cost'],
+			'ageLimit' => $row['agelimit'],
+			'beginnerFriendly' => $row['beginnerfriendly'] == 't',
+			'storyDescription' => $row['storydescription'],
+			'infoDescription' => $row['infodescription'],
+			'organizerName' => $row['organizername'],
+			'organizerEmail' => $row['organizeremail'],
+			'link1' => $row['link1'],
+			'link2' => $row['link2'],
+			'status' => $row['status'],
+			'password' => $row['password'],
+			'eventFull' => $row['eventfull'] == 't',
+			'invitationOnly' => $row['invitationonly'] == 't',
+			'languageFree' => $row['languagefree'] == 't',
+			'illusionId' => empty($row['illusionid']) ? null : intval($row['illusionid'])
+		];
+	}
+	
+	return null;
+}
+
 function getCeventObject($id) {
-    if (file_exists('./dat/connectDB.php')) {
-        require_once ('./dat/connectDB.php');
-    } else {
-        require_once ('./../dat/connectDB.php');
-    }
-    if (file_exists('./dat/cEvent.php')) {
-        require_once ('./dat/cEvent.php');
-    } else {
-        require_once ('./../dat/cEvent.php');
-    }
-    $query = "SELECT * FROM events WHERE id = '$id';";
-    $result = dbQuery($query);
-    if ($result != null) {
-        $row = pg_fetch_row($result);
-        $event = new cEvent($row[0], $row[1], $row[2], $row[3], $row[4], $row[5], $row[6]
-                , $row[7], $row[8], $row[9], $row[10], $row[11], $row[12], $row[13]
-                , $row[14], $row[15], $row[16], $row[17], $row[18], $row[19], $row[20], $row[21], $row[22]);
-        return $event;
-    } else {
-        return null;
-    }
+	if (file_exists ( './dat/connectDB.php' )) {
+		require_once ('./dat/connectDB.php');
+	} else {
+		require_once ('./../dat/connectDB.php');
+	}
+	if (file_exists ( './dat/cEvent.php' )) {
+		require_once ('./dat/cEvent.php');
+	} else {
+		require_once ('./../dat/cEvent.php');
+	}
+	$query = "SELECT * FROM events WHERE id = '$id';";
+	$result = dbQuery ( $query );
+	if ($result != null) {
+		$row = pg_fetch_row ( $result );
+		$event = new cEvent ( $row [0], $row [1], $row [2], $row [3], $row [4], $row [5], $row [6], $row [7], $row [8], $row [9], $row [10], $row [11], $row [12], $row [13], $row [14], $row [15], $row [16], $row [17], $row [18], $row [19], $row [20], $row [21], $row [22] );
+		return $event;
+	} else {
+		return null;
+	}
 }
 
 function getListOfEventsForApproval() {
@@ -241,21 +349,20 @@ function approveEvent($eventId) {
     if ($res == null) {
         return false;
     }
+    
     // If it's a modified event, the original event will be updated and the modified one will be deleted
-    if (strpos($res['status'], "MODIFIED") !== false) {
-        $originalEvent = $res['password'];
-        $replacequery = "UPDATE events SET (eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2) = ('" . cleanData($res['eventname']) . "', '" . cleanData($res['eventtype']) . "', '" . cleanData($res['startdate']) . "', '" . cleanData($res['enddate']) . "', '" . cleanData($res['datetextfield']) . "', '" . cleanData($res['startsignuptime']) . "', '" . cleanData($res['endsignuptime']) . "', '" . cleanData($res['locationdropdown']) . "', '" . cleanData($res['locationtextfield']) . "', '" . cleanData($res['iconurl']) . "', '" . cleanData($res['genre']) . "', '" . cleanData($res['cost']) . "', '" . cleanData($res['agelimit']) . "', '" . cleanData($res['beginnerfriendly']) . "', '" . cleanData($res['storydescription']) . "', '" . cleanData($res['infodescription']) . "', '" . cleanData($res['organizername']) . "', '" . cleanData($res['organizeremail']) . "', '" . cleanData($res['link1']) . "', '" . cleanData($res['link2']) . "') WHERE password = '" . $originalEvent . "';";
+    if ($res['status'] == "MODIFIED") {
+    	  $activeEvent = getEventIdByPasswordAndStatus($res['password'], "ACTIVE");
+    	  $replacequery = "UPDATE events SET (eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2) = ('" . cleanData($res['eventname']) . "', '" . cleanData($res['eventtype']) . "', '" . cleanData($res['startdate']) . "', '" . cleanData($res['enddate']) . "', '" . cleanData($res['datetextfield']) . "', '" . cleanData($res['startsignuptime']) . "', '" . cleanData($res['endsignuptime']) . "', '" . cleanData($res['locationdropdown']) . "', '" . cleanData($res['locationtextfield']) . "', '" . cleanData($res['iconurl']) . "', '" . cleanData($res['genre']) . "', '" . cleanData($res['cost']) . "', '" . cleanData($res['agelimit']) . "', '" . cleanData($res['beginnerfriendly']) . "', '" . cleanData($res['storydescription']) . "', '" . cleanData($res['infodescription']) . "', '" . cleanData($res['organizername']) . "', '" . cleanData($res['organizeremail']) . "', '" . cleanData($res['link1']) . "', '" . cleanData($res['link2']) . "') WHERE id = '" . $activeEvent . "';";
         $replaceresults = dbQuery($replacequery);
-        $replaceres = pg_fetch_assoc($replaceresults);
-        if ($replaceres == null) {
-            return false;
-        }
-        $deleteresult = deleteEvent($eventid);
+        dbQueryP("update events set illusionid = (select illusionid from events where id = $1) where id = $2", [ $eventId, $activeEvent ]);
+        
+        $deleteresult = deleteEvent($eventId);
         return $deleteresult;
     }
     // If it's a new event, it will just be turned active
     else {
-        $query = "UPDATE events SET status = 'ACTIVE' WHERE id = $eventId;";
+    	$query = "UPDATE events SET status = 'ACTIVE' WHERE id = $eventId;";
         $result = dbQuery($query);
         if ($result != null) {
             return true;

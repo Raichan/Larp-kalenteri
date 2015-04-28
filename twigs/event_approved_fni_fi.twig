@@ -1,0 +1,28 @@
+{% if modified %}
+Muokkaukset tapahtumaasi on hyväksytty larp-kalenteriin sekä Forge & Illusionin tapahtumakalenteriin. 
+{% else %}
+Tapahtumasi on hyväksytty larp-kalenteriin sekä Forge & Illusionin tapahtumakalenteriin. 
+{% endif %}
+
+Pääset katselemaan tapahtumaa larp-kalenterissa osoitteessa {{ eventurl }} ja 
+Forge & Illusionissa osoitteessa: {{ fnieventurl }}. 
+
+Voit muokata tapahtumaasi Larp-kalenterissa käyttämällä salasanaa {{ password }}
+
+{% if fniusercreated %}
+Sinulle on luotu tunnukset Forge & Illusioniin. Sisäänkirjautuminen tapahtuu käyttämällä tunnuksia:
+
+Sähköposti: {{ fniemail }}
+Salasana: {{ fnipassword }}
+{% else %}
+Tapahtuma on liitetty tiliin Forge & Illusion tiliisi {{ fniemail }}.
+{% endif %}
+
+Pääset muokkaamaan Forge & Illusion tapahtumaa kirjautumalla sisään tunnuksillasi tapahtuman sivulla.
+
+{% if not comments is empty %}
+Ylläpidon kommentit: 
+{{ comments }}
+
+{% endif %}
+Lähetä sähköpostia osoitteeseen larp.kalenteri@gmail.com jos sinulla on kysymyksiä.

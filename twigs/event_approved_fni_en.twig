@@ -1,0 +1,28 @@
+{% if modified %}
+Modifications into your event has been approved into the larp calendar and the Forge & Illusion event calendar.
+{% else %}
+Your event has been approved into the larp calendar and the Forge & Illusion event calendar. 
+{% endif %}
+
+You can view your event in the larp calendar at {{ eventurl }} and 
+in the Forge & Illusion at {{ fnieventurl }}. 
+
+You can modify your event in the larp calendar using following password: {{ password }}
+
+{% if fniusercreated %}
+New Forge & Illusion account has also been created for you. You can now login using following credentials:
+
+E-mail: {{ fniemail }}
+Password: {{ fnipassword }}
+{% else %}
+The event has been added to your Forge & Illusion account {{ fniemail }}.
+{% endif %}
+
+You can modify Forge & Illusion event by loggin in in the event page.
+
+{% if not comments is empty %}
+Comments from administrators:
+{{ comments }}
+
+{% endif %}
+Please contact larp.kalenteri@gmail.com if you have any questions.

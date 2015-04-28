@@ -2,7 +2,10 @@
     <h1>
         <img src="/images/logo.jpg"><small>
 		<?php
-			session_start();
+			if(!isset($_SESSION)) 
+		    { 
+		        session_start(); 
+		    } 
 			echo $header_title;
 			if (isset($_SESSION["valid"])) {
 				$ADMIN = true;

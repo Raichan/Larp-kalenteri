@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../illusion/illusion.php';
+
 if (isset($_SESSION["valid"])) {
     $ADMIN = true;
 } else {
@@ -47,10 +49,11 @@ function debug_to_console($data) {
 // Define variables and set to empty values
 $nameErr = $dateErr = $signupErr = $locaErr = $iconErr = $costErr = $infoErr = $orgEmailErr = $web1Err = $web2Err = "";
 $eventid = $eventname = $eventtype = $datestart = $dateend = $datetext = $signupstart = $signupend = $location1 = $location2 = $icon = $genrestring = $cost = $agelimit = $beginnerfriendly = $eventfull = $invitationonly = $languagefree = $storydesc = $infodesc = $organizername = $organizeremail = $website1 = $website2 = $status = $password = "";
+$illusionSync = true;
 $genre = array();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
-    $valid = true; // Are there errors in the form?
+	$valid = true; // Are there errors in the form?
 
     if (!empty($_POST["eventid"])) {
         $eventid = test_input($_POST["eventid"]);
@@ -138,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $costErr = $err_cost;
             $valid = false;
         }
-		if(cost < 0) {
+		if($cost < 0) {
 			$costErr = $err_cost;
             $valid = false;
 		}
@@ -270,7 +273,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         $organizeremail = pg_escape_string($organizeremail);
         $website1 = pg_escape_string($website1);
         $website2 = pg_escape_string($website2);
-
+        $illusionSync = isset($_POST["illusionsync"]) ? "true" : "false";
+        $illusionEventId = null;
+        
         // If we're modifying the event, original and modified ones must have same passwords
         if ($proceedurl == "modifySuccess.php") {
             $status = "MODIFIED";
@@ -278,6 +283,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
             $results = dbQuery($passquery); // FIX: Check if there's only one
             $res = pg_fetch_assoc($results);
             $password = $res['password'];
+            $originalIllusionId = getEventIllusionIdByEventId($eventid);
         } else {
             $status = "PENDING";
             $password = create_random_password();
@@ -294,10 +300,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["modifyid"])) {
         if ($ADMIN == true) {
             $status = 'ACTIVE';
         }
-        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "')";
-
+        
+        $query = "INSERT INTO events(eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree) VALUES('" . $eventname . "', '" . $eventtype . "', '" . $datestart . "', '" . $dateend . "','" . $datetext . "', '" . $signupstart . "', '" . $signupend . "', '" . $location1 . "', '" . $location2 . "', '" . $icon . "', '" . $genrestring . "', '" . $cost . "', '" . $agelimit . "', '" . $beginnerfriendly . "', '" . $storydesc . "', '" . $infodesc . "', '" . $organizername . "', '" . $organizeremail . "', '" . $website1 . "', '" . $website2 . "', '" . $status . "', '" . $password . "', '" . $eventfull . "', '" . $invitationonly . "', '" . $languagefree . "') RETURNING id";
         $result = dbQuery($query);
+        $row = pg_fetch_assoc($result);
+        
+        $newEventId = intval($row['id']);
+        if ($newEventId == null) {
+          throw new Exception("Could not find eventId for new event");
+        }
+        
+        if ($eventid && ($newEventId != $eventid)) {
+        	updateEventIllusionId($newEventId, $originalIllusionId);
+        }
 
+        $eventData = getEventData($newEventId);
+        if ($eventData == null) {
+          throw new Exception("Could not find event data for event $newEventId");
+        }
+        
+        if ($illusionSync == "true") {
+          // Illusion synchronization is enabled so we need to create or update 
+          // corresponding event into the Forge & Illusion
+        	
+        	if ($eventData['illusionId'] == null) {
+        		// The event is not yet bound to an Illusion event, so we create one 
+        		$newUser = getIllusionController()->findUserByEmail($eventData['organizerEmail']);
+        		$illusionEvent = getIllusionController()->createEvent($eventData);
+        		updateEventIllusionId($newEventId, $illusionEvent['id']);
+        		updateEventFnIUserCreated($newEventId, $newUser == null);
+        	} else {
+        		if ($ADMIN == true) {
+        			getIllusionController()->updateEvent($eventData);
+        		}
+        	}
+        } else {
+        	// If Illusion synchronization is not enabled, we sever the connection between systems 
+        	if ($eventData['illusionId'] != null) {
+        		// TODO: Inform event organizer about this.
+        	  updateEventIllusionId($eventId, null);
+        	}
+        }
+        
         if ($result) {
             // Sending all admins an email notification
             include(__DIR__ . "/emails.php");
