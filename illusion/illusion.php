@@ -218,7 +218,7 @@
   		$result = [];
   		
   		foreach ($genres as $genre) {
-  			$result[] = $this->getGenreName($genre);
+  			$result[] = $this->getGenreName(trim($genre));
   		}
   		
   		return $result;
