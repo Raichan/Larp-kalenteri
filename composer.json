@@ -1,6 +1,7 @@
 {
    "name": "Raichan/Larp-kalenteri",
    "description": "Larp-kalenteri",
+   "version": "1.0.1",
    "authors": [ 
      {
        "name": "Laura Sirola"
