@@ -96,6 +96,32 @@ class RestTests extends IntegrationTest {
 		$this->assertEquals("pong", $response->getBody());
   }
   
+  public function testListGenres() {
+  	$client = $this->createAuthorizedClient();
+  	 
+  	$response = $client->get('/rest/genres/');
+  	$this->assertEquals(200, $response->getStatusCode());
+  	$this->assertNotNull($response->json());
+  	$events = $response->json();
+  	$this->assertEquals(18, sizeof($events));
+  	$this->assertEquals("fantasy", $events[0]['id']);
+  	$this->assertEquals("Fantasia", $events[0]['name']['fi']);
+  	$this->assertEquals("Fantasy", $events[0]['name']['en']);
+  }
+  
+  public function testListTypes() {
+  	$client = $this->createAuthorizedClient();
+  	 
+  	$response = $client->get('/rest/types/');
+  	$this->assertEquals(200, $response->getStatusCode());
+  	$this->assertNotNull($response->json());
+  	$events = $response->json();
+  	$this->assertEquals(4, sizeof($events));
+  	$this->assertEquals("2", $events[0]['id']);
+  	$this->assertEquals("Larpit", $events[0]['name']['fi']);
+  	$this->assertEquals("Larps", $events[0]['name']['en']);
+  }
+  
   public function testListEvents() {
   	$this->createEvent("First", "4",
   			$this->getTimestamp(2015, 1, 1), $this->getTimestamp(2015, 1, 2),
