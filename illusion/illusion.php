@@ -128,7 +128,7 @@
   		foreach ($this->getGenreNames($genres) as $genreName) {
   			$genreId = $genreIdMap[$genreName];
   			if (!$genreId) {
-  				throw new Exception("genreId for '$genreName' could not be found.");
+  				throw new Exception("genreId for $genreName could not be found from genreMap: " . var_export($genreIdMap, true));
   			}
   			
   			$result[] = $genreId;
@@ -218,50 +218,22 @@
   		$result = [];
   		
   		foreach ($genres as $genre) {
-  			$result[] = $this->getGenreName($genre);
+  			$result[] = $this->getGenreName(trim($genre));
   		}
   		
   		return $result;
   	}
   	
   	private function getGenreName($genre) {
-  		// TODO: This mapping should be in database 
-  		switch (trim($genre)) {
-  			case "fantasy":
-  			  return "Fantasia";
-  			case "sci-fi":
-	  		case "scifi":
-	  			return "Sci-fi";
-  			case "cyberpunk":
-  				return "Cyberpunk";
-  			case "steampunk":
-  				return "Steampunk";
-  			case "post-apocalyptic":
-  			case "postapo":
-  				return "Post-apokalyptinen";
-  			case "historical":
-  				return "Historiallinen";
-  			case "thriller":
-  				return "Jännitys";
-  			case "horror":
-  				return "Kauhu";
-  			case "reality":
-  				return "Realismi";
-  			case "city larp":
-  			case "city":
-  				return "Kaupunkipeli";
-  			case "new weird":
-  			case "newweird":
-  				return "Uuskumma";
-  			case "action":
-  				return "Toiminta";
-  			case "drama":
-  				return "Draama";
-  			case "humor":
-  				return "Huumori";
+  		$event_genres = getEventGenres();
+  		
+  		foreach ($event_genres as $event_genre) {
+  			if ($event_genre['id'] == $genre) {
+  				return $event_genre['name']['fi'];
+  			}
   		}
   		
-  		return null;
+  		throw new Exception("Could not resolve genre name for genre id $genre from genres " . var_export($event_genres, true));
   	}
   	
   	private function listIllusionTypes() {
@@ -285,16 +257,10 @@
   	}
   	
   	private function getTypeName($type) {
-  		// TODO: This mapping should be in database
-  		switch ($type) {
-        case "2": 
-        	return "Larpit";
-        case "3": 
-        	return "Conit ja miitit";
-        case "4": 
-        	return "Kurssit ja työpajat";
-        case "5": 
-        	return "Muut";
+  		foreach (getEventTypes() as $event_type) {
+  			if ($event_type['id'] == $type) {
+  				return $event_type['name']['fi'];
+  			}
   		}
   		
   		return null;

@@ -200,13 +200,76 @@ function strToDate($str) {
 	->setTime(0, 0, 0);
 }
 
+function dateToStr($date) {
+	if ($date == null) {
+		return null;
+	}
+
+	return strval($date->getTimestamp());
+}
+
+function getEventIds() {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$ids = [];
+
+	$result = dbQuery("select id from events");
+	
+	while ($row = pg_fetch_assoc($result)) {
+		$ids[] = $row['id'];
+	}
+	
+	return $ids;
+}
+
+function getEventIdsByStatus($status) {
+	require_once (__DIR__ . '/connectDB.php');
+	
+	$ids = [];
+
+	$result = dbQueryP("select id from events where status = $1", [$status]);
+	
+	while ($row = pg_fetch_assoc($result)) {
+		$ids[] = $row['id'];
+	}
+	
+	return $ids;
+}
+
+function createEvent($eventName, $eventType, $startDate, $endDate, $dateTextField, $startSignupTime, $endSignupTime, $locationDropDown, $locationTextField, $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly, $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull, $invitationOnly, $languageFree) {
+	$result = dbQueryP("insert into
+	  events (eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime, locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, storyDescription, infoDescription, organizerName, organizerEmail, link1, link2, status, password, eventFull, invitationOnly, languageFree)
+	values 
+	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25) returning id", 
+			[$eventName, $eventType, dateToStr($startDate), dateToStr($endDate), $dateTextField, dateToStr($startSignupTime), dateToStr($endSignupTime), $locationDropDown, $locationTextField, $iconUrl, join(',', $genre), $cost, $ageLimit, $beginnerFriendly ? 't' : 'f', $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull ? 't' : 'f', $invitationOnly ? 't' : 'f', $languageFree ? 't' : 'f']);
+	if ($result) {
+  	$row = pg_fetch_assoc($result);
+  	if ($row) {
+	    return intval($row['id']);
+  	}
+	} 
+	
+	return null;
+}
+
+function updateEvent($eventId, $eventName, $eventType, $startDate, $endDate, $dateTextField, $startSignupTime, $endSignupTime, $locationDropDown, $locationTextField, $iconUrl, $genre, $cost, $ageLimit, $beginnerFriendly, $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull, $invitationOnly, $languageFree) {
+	$result = dbQueryP(
+	"update events
+	   set eventName = $1, eventType = $2, startDate = $3, endDate = $4, dateTextField = $5, startSignupTime = $6, endSignupTime = $7, locationDropDown = $8, locationTextField = $9, iconUrl = $10, genre = $11, cost = $12, ageLimit = $13, beginnerFriendly = $14, storyDescription = $15, infoDescription = $16, organizerName = $17, organizerEmail = $18, link1 = $19, link2 = $20, status = $21, password = $22, eventFull = $23, invitationOnly = $24, languageFree = $25
+	 where
+		 id = $26",
+			[$eventName, $eventType, dateToStr($startDate), dateToStr($endDate), $dateTextField, dateToStr($startSignupTime), dateToStr($endSignupTime), $locationDropDown, $locationTextField, $iconUrl, join(',', $genre), $cost, $ageLimit, $beginnerFriendly ? 't' : 'f', $storyDescription, $infoDescription, $organizerName, $organizerEmail, $link1, $link2, $status, $password, $eventFull ? 't' : 'f', $invitationOnly ? 't' : 'f', $languageFree ? 't' : 'f', $eventId]);
+	
+	return !!$result;
+}
+
 function getEventData($id) {
 	require_once (__DIR__ . '/connectDB.php');
 	
 	$result = dbQueryP(
 			"select
 			  id, eventName, eventType, startDate, endDate, dateTextField, startSignupTime, endSignupTime,
-			  locationDropDown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
+			  locationdropdown, locationTextField, iconUrl, genre, cost, ageLimit, beginnerFriendly, eventFull,
 				invitationOnly, languageFree, storyDescription, infoDescription, organizerName, organizerEmail,
 				link1, link2, status, password, illusionId
 			from
@@ -216,6 +279,9 @@ function getEventData($id) {
 	
 	if ($result) {
 		$row = pg_fetch_assoc($result);
+		if (!$row) {
+			return;
+		}
 		
 		return [
 		  'id' => intval($row['id']),
@@ -227,6 +293,7 @@ function getEventData($id) {
 			'signUpStart' => strToDate($row['startsignuptime']),
 			'signUpEnd' => strToDate($row['endsignuptime']),
 			'location' => $row['locationtextfield'],
+			'locationDropDown' => $row['locationdropdown'],	
 			'iconURL' => $row['iconurl'],
 			'genres' => $row['genre'] ? explode(",", $row['genre']) : [],
 			'cost' => $row['cost'],
@@ -628,4 +695,106 @@ function getCalendarRows($date) {
     //------------------------------------------------------------------
 
     return $calendar;
+}
+
+function getEventGenres() {
+	// TODO: This mapping should be in database
+	
+	return [
+		[
+			"id" => "fantasy",
+			"name" => ['fi' => "Fantasia", 'en' => "Fantasy" ]
+		],
+		[
+			"id" => "sci-fi",
+			"name" => ['fi' => "Sci-fi", 'en' => "Sci-fi" ]
+		],
+		[
+			"id" => "scifi",
+			"name" => ['fi' => "Sci-fi", 'en' => "Sci-fi" ]
+		],
+		[
+			"id" => "cyberpunk",
+			"name" => ['fi' => "Cyberpunk", 'en' => "Cyberpunk" ]
+		],
+		[
+			"id" => "steampunk",
+			"name" => ['fi' => "Steampunk", 'en' => "Steampunk" ]
+		],
+		[
+			"id" => "post-apocalyptic",
+			"name" => ['fi' => "Post-apokalyptinen", 'en' => "Post-apocalyptic" ]
+		],
+		[
+			"id" => "postapo",
+			"name" => ['fi' => "Post-apokalyptinen", 'en' => "Post-apocalyptic" ]
+		],
+		[
+			"id" => "historical",
+			"name" => ['fi' => "Historiallinen", 'en' => "Historical" ]
+		],
+		[
+			"id" => "thriller",
+			"name" => ['fi' => "Jännitys", 'en' => "Thriller" ]
+		],
+		[
+			"id" => "horror",
+			"name" => ['fi' => "Kauhu", 'en' => "Horror" ]
+		],
+		[
+			"id" => "reality",
+			"name" => ['fi' => "Realismi", 'en' => "Reality" ]
+		],
+		[
+			"id" => "city larp",
+			"name" => ['fi' => "Kaupunkipeli", 'en' => "City larp" ]
+		],
+		[
+			"id" => "city",
+			"name" => ['fi' => "Kaupunkipeli", 'en' => "City larp" ]
+		],
+		[
+			"id" => "new weird",
+			"name" => ['fi' => "Uuskumma", 'en' => "New weird" ]
+		],
+		[
+			"id" => "newweird",
+			"name" => ['fi' => "Uuskumma", 'en' => "New weird" ]
+		],
+		[
+			"id" => "action",
+			"name" => ['fi' => "Toiminta", 'en' => "Action" ]
+		],
+		[
+			"id" => "drama",
+			"name" => ['fi' => "Draama", 'en' => "Drama" ]
+		],
+		[
+			"id" => "humor",
+			"name" => ['fi' => "Huumori", 'en' => "Humor" ]
+		]
+	];
+}
+
+function getEventTypes() {
+	// TODO: This mapping should be in database
+	
+	return [
+		[
+			"id" => "2",
+			"name" => ['fi' => "Larpit", 'en' => "Larps" ]
+		],
+		[ 
+			"id" => "3",
+			"name" => ['fi' => "Conit ja miitit", 'en' => "Conventions and meetups"	]
+		],
+		[ 
+			"id" => "4",
+			"name" => ['fi' => "Kurssit ja työpajat", 'en' => "Courses and workshops" ]
+		],
+		[ 
+			"id" => "5",
+			"name" => ['fi' => "Muut", 'en' => "Other" ]
+		]
+	];
 }

@@ -1,8 +1,23 @@
 {
+   "name": "Raichan/Larp-kalenteri",
+   "description": "Larp-kalenteri",
+   "version": "1.0.1",
+   "authors": [ 
+     {
+       "name": "Laura Sirola"
+     },
+     {
+       "name": "Antti Leppä",
+       "email": "antti.leppa@foyt.fi"
+     }     
+    ],
     "require": {
+        "php": ">=5.4.0",
         "guzzlehttp/guzzle": "~5.0",
         "commerceguys/guzzle-oauth2-plugin": "~2.0",
-        "twig/twig": "~1.0"
+        "twig/twig": "~1.0",
+        "slim/slim": "~2.6",
+        "league/oauth2-server": "~4.1"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
