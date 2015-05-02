@@ -205,7 +205,7 @@ function dateToStr($date) {
 		return null;
 	}
 
-	return $date->getTimestamp();
+	return strval($date->getTimestamp());
 }
 
 function getEventIds() {
@@ -695,4 +695,106 @@ function getCalendarRows($date) {
     //------------------------------------------------------------------
 
     return $calendar;
+}
+
+function getEventGenres() {
+	// TODO: This mapping should be in database
+	
+	return [
+		[
+			"id" => "fantasy",
+			"name" => ['fi' => "Fantasia", 'en' => "Fantasy" ]
+		],
+		[
+			"id" => "sci-fi",
+			"name" => ['fi' => "Sci-fi", 'en' => "Sci-fi" ]
+		],
+		[
+			"id" => "scifi",
+			"name" => ['fi' => "Sci-fi", 'en' => "Sci-fi" ]
+		],
+		[
+			"id" => "cyberpunk",
+			"name" => ['fi' => "Cyberpunk", 'en' => "Cyberpunk" ]
+		],
+		[
+			"id" => "steampunk",
+			"name" => ['fi' => "Steampunk", 'en' => "Steampunk" ]
+		],
+		[
+			"id" => "post-apocalyptic",
+			"name" => ['fi' => "Post-apokalyptinen", 'en' => "Post-apocalyptic" ]
+		],
+		[
+			"id" => "postapo",
+			"name" => ['fi' => "Post-apokalyptinen", 'en' => "Post-apocalyptic" ]
+		],
+		[
+			"id" => "historical",
+			"name" => ['fi' => "Historiallinen", 'en' => "Historical" ]
+		],
+		[
+			"id" => "thriller",
+			"name" => ['fi' => "Jännitys", 'en' => "Thriller" ]
+		],
+		[
+			"id" => "horror",
+			"name" => ['fi' => "Kauhu", 'en' => "Horror" ]
+		],
+		[
+			"id" => "reality",
+			"name" => ['fi' => "Realismi", 'en' => "Reality" ]
+		],
+		[
+			"id" => "city larp",
+			"name" => ['fi' => "Kaupunkipeli", 'en' => "City larp" ]
+		],
+		[
+			"id" => "city",
+			"name" => ['fi' => "Kaupunkipeli", 'en' => "City larp" ]
+		],
+		[
+			"id" => "new weird",
+			"name" => ['fi' => "Uuskumma", 'en' => "New weird" ]
+		],
+		[
+			"id" => "newweird",
+			"name" => ['fi' => "Uuskumma", 'en' => "New weird" ]
+		],
+		[
+			"id" => "action",
+			"name" => ['fi' => "Toiminta", 'en' => "Action" ]
+		],
+		[
+			"id" => "drama",
+			"name" => ['fi' => "Draama", 'en' => "Drama" ]
+		],
+		[
+			"id" => "humor",
+			"name" => ['fi' => "Huumori", 'en' => "Humor" ]
+		]
+	];
+}
+
+function getEventTypes() {
+	// TODO: This mapping should be in database
+	
+	return [
+		[
+			"id" => "2",
+			"name" => ['fi' => "Larpit", 'en' => "Larps" ]
+		],
+		[ 
+			"id" => "3",
+			"name" => ['fi' => "Conit ja miitit", 'en' => "Conventions and meetups"	]
+		],
+		[ 
+			"id" => "4",
+			"name" => ['fi' => "Kurssit ja työpajat", 'en' => "Courses and workshops" ]
+		],
+		[ 
+			"id" => "5",
+			"name" => ['fi' => "Muut", 'en' => "Other" ]
+		]
+	];
 }

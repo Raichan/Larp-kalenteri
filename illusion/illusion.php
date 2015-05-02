@@ -225,40 +225,10 @@
   	}
   	
   	private function getGenreName($genre) {
-  		// TODO: This mapping should be in database 
-  		switch (trim($genre)) {
-  			case "fantasy":
-  			  return "Fantasia";
-  			case "sci-fi":
-	  		case "scifi":
-	  			return "Sci-fi";
-  			case "cyberpunk":
-  				return "Cyberpunk";
-  			case "steampunk":
-  				return "Steampunk";
-  			case "post-apocalyptic":
-  			case "postapo":
-  				return "Post-apokalyptinen";
-  			case "historical":
-  				return "Historiallinen";
-  			case "thriller":
-  				return "Jännitys";
-  			case "horror":
-  				return "Kauhu";
-  			case "reality":
-  				return "Realismi";
-  			case "city larp":
-  			case "city":
-  				return "Kaupunkipeli";
-  			case "new weird":
-  			case "newweird":
-  				return "Uuskumma";
-  			case "action":
-  				return "Toiminta";
-  			case "drama":
-  				return "Draama";
-  			case "humor":
-  				return "Huumori";
+  		foreach (getEventGenres() as $event_genre) {
+  			if ($event_genre['id'] == $genre) {
+  				return $event_genre['name']['fi'];
+  			}
   		}
   		
   		return null;
@@ -285,16 +255,10 @@
   	}
   	
   	private function getTypeName($type) {
-  		// TODO: This mapping should be in database
-  		switch ($type) {
-        case "2": 
-        	return "Larpit";
-        case "3": 
-        	return "Conit ja miitit";
-        case "4": 
-        	return "Kurssit ja työpajat";
-        case "5": 
-        	return "Muut";
+  		foreach (getEventTypes() as $event_type) {
+  			if ($event_type['id'] == $type) {
+  				return $event_type['name']['fi'];
+  			}
   		}
   		
   		return null;
