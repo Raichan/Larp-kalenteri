@@ -180,7 +180,7 @@ $app->put('/events/:id', authenticate($resource_server), function ($id) use ($ap
 			$response->body("Missing payload");
 			return;
 		}
-	
+		
 		$event = Event::fromJSON($body);
 		if (!$event) {
 			$app->status(400);
@@ -189,7 +189,7 @@ $app->put('/events/:id', authenticate($resource_server), function ($id) use ($ap
 		}
 	
 		$updated = updateEvent(
-				$id,
+				intval($id),
 				$event->getName(), 
 				$event->getType(), 
 				$event->getStart(), 
@@ -248,6 +248,26 @@ $app->delete('/events/:id', authenticate($resource_server), function ($id) use (
   	$app->status(204);
 	}
 })->name('id')->conditions(array('id' => '[0-9]{1,}'));
+
+/**
+ * List genres
+ */
+$app->get('/genres/', authenticate($resource_server), function () use ($app) {
+	$response = $app->response();
+	$response['Content-Type'] = 'application/json';
+	$response->status(200);
+	$response->body(json_encode(getEventGenres()));
+});
+
+/**
+ * List types
+ */
+$app->get('/types/', authenticate($resource_server), function () use ($app) {
+	$response = $app->response();
+	$response['Content-Type'] = 'application/json';
+	$response->status(200);
+	$response->body(json_encode(getEventTypes()));
+});
 
 $app->run();
     
