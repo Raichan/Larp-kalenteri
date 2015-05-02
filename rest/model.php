@@ -342,7 +342,9 @@ class Event {
 			return null;
 		}
 		
-		return DateTime::createFromFormat(DateTime::ISO8601, $str);
+		$result = new DateTime();
+		$result->setTimestamp(strtotime($str));
+		return $result;
 	}
 	
 }
