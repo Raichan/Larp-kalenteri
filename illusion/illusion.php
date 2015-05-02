@@ -225,13 +225,15 @@
   	}
   	
   	private function getGenreName($genre) {
-  		foreach (getEventGenres() as $event_genre) {
+  		$event_genres = getEventGenres();
+  		
+  		foreach ($event_genres as $event_genre) {
   			if ($event_genre['id'] == $genre) {
   				return $event_genre['name']['fi'];
   			}
   		}
   		
-  		return null;
+  		throw new Exception("Could not resolve genre name for genre id $genre from genres " . var_export($event_genres, true));
   	}
   	
   	private function listIllusionTypes() {
