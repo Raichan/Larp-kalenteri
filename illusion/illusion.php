@@ -128,7 +128,7 @@
   		foreach ($this->getGenreNames($genres) as $genreName) {
   			$genreId = $genreIdMap[$genreName];
   			if (!$genreId) {
-  				throw new Exception("genreId for '$genreName' could not be found.");
+  				throw new Exception("genreId for $genreName could not be found from genreMap: " . var_export($genreIdMap, true));
   			}
   			
   			$result[] = $genreId;
